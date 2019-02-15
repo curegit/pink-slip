@@ -7,7 +7,7 @@ namespace Speedcar
 	[RequireComponent(typeof(Rigidbody)), DisallowMultipleComponent]
 	public class Suspension : MonoBehaviour
 	{
-		
+
 		[SerializeField]
 		private WheelCollider frontLeftWheelCollider;
 
@@ -82,14 +82,14 @@ namespace Speedcar
 
 		[SerializeField]
 		private int substepsBelowThreshold = 4;
-		
+
 
 		private float brake;
 
 		private float handBrake;
 
 		private float steerRate;
-		
+
 
 		public WheelCollider FrontLeftWheelCollider
 		{
@@ -654,31 +654,19 @@ namespace Speedcar
 
 		private void Stabilize()
 		{
-			float travelLeftFront = FrontLeftWheelHit == null ? 1.0f : -FrontLeftWheelCollider.transform.InverseTransformPoint(FrontLeftWheelHit.Value.point).y / FrontLeftWheelCollider.suspensionDistance;
-			float travelRightFront = 1.0f;
+			float travelLeftFront = FrontLeftWheelHit == null ? 1.0f : (-(FrontLeftWheelCollider.transform.InverseTransformPoint(FrontLeftWheelHit.Value.point).y - FrontLeftWheelCollider.center.y) - FrontLeftWheelCollider.radius) / FrontLeftWheelCollider.suspensionDistance;
+			float travelRightFront = FrontRightWheelHit == null ? 1.0f : (-(FrontRightWheelCollider.transform.InverseTransformPoint(FrontRightWheelHit.Value.point).y - FrontRightWheelCollider.center.y) - FrontRightWheelCollider.radius) / FrontRightWheelCollider.suspensionDistance;
 
 
-			
+			float frontCoefficient = Mathf.Lerp(2 * FrontStabilizerCoefficient, 0f, StabilizerBias);
+			float rearCoefficient = Mathf.Lerp(0f, 2f * RearStabilizerCoefficient, StabilizerBias);
 
-			/*
-			if (groundedLeft)
-			{
-				travelLeft = (-leftWheel.transform.InverseTransformPoint(FrontLeftWheelHit.Value.point).y - leftWheel.radius) / leftWheel.suspensionDistance;
-			}
-			if (groundedRight)
-			{
-				travelRight = (-rightWheel.transform.InverseTransformPoint(rightHit.point).y - rightWheel.radius) / rightWheel.suspensionDistance;
-			}
-			float antiRollForce = (travelLeft - travelRight) * coefficient;
-			if (groundedLeft)
-			{
-				GetComponent<Rigidbody>().AddForceAtPosition(leftWheel.transform.up * -antiRollForce, leftWheel.transform.position);
-			}
-			if (groundedRight)
-			{
-				GetComponent<Rigidbody>().AddForceAtPosition(rightWheel.transform.up * antiRollForce, rightWheel.transform.position);
-			}
-			*/
+			float frontAntiRollForce = (travelLeftFront - travelRightFront) * frontCoefficient;
+
+			if (FrontLeftWheelHit != null) Rigidbody.AddForceAtPosition(FrontLeftWheelCollider.transform.up * -frontAntiRollForce, WheelPosition(FrontLeftWheelCollider));
+			if (FrontRightWheelHit != null) Rigidbody.AddForceAtPosition(FrontRightWheelCollider.transform.up * frontAntiRollForce, WheelPosition(FrontRightWheelCollider));
+
+
 
 
 		}
@@ -749,8 +737,11 @@ namespace Speedcar
 		{
 			foreach (var wheelCollider in WheelColliders)
 			{
-				float centerOfMassDistance = Rigidbody.transform.TransformVector(Rigidbody.transform.InverseTransformPoint(Rigidbody.worldCenterOfMass) - WheelRelativePosition(wheelCollider)).y + wheelCollider.transform.lossyScale.y * wheelCollider.radius;
-				float shift = ForceShift * wheelCollider.transform.lossyScale.y;
+				float mass = Rigidbody.transform.InverseTransformPoint(Rigidbody.worldCenterOfMass).y;
+				float wheel = Rigidbody.transform.InverseTransformPoint(WheelPosition(wheelCollider)).y;
+				float wheelToMass = (mass - wheel) * Rigidbody.transform.lossyScale.y / wheelCollider.transform.lossyScale.y;
+				float centerOfMassDistance = wheelToMass + wheelCollider.radius;
+				float shift = ForceShift / wheelCollider.transform.lossyScale.y;
 				wheelCollider.forceAppPointDistance = centerOfMassDistance - shift;
 			}
 		}
@@ -764,14 +755,14 @@ namespace Speedcar
 			if (AutoConfigureSuspensionDistance)
 			{
 				// 
-				float gravity = Physics.gravity.y;
+				float gravity = Mathf.Abs(Physics.gravity.y);
 				// 
 				foreach (var wheelCollider in WheelColliders)
 				{
 					//
 					float distance = wheelCollider.sprungMass * gravity / (WheelColliders.Average(w => w.suspensionSpring.targetPosition) * wheelCollider.suspensionSpring.spring);
 					// 
-					wheelCollider.suspensionDistance = distance * wheelCollider.transform.lossyScale.y;
+					wheelCollider.suspensionDistance = distance / wheelCollider.transform.lossyScale.y;
 				}
 			}
 			// 
@@ -808,26 +799,9 @@ namespace Speedcar
 			return Mathf.Atan(1 / (axleTrack / Wheelbase + 1 / Mathf.Tan(innerAngle * Mathf.Deg2Rad))) * Mathf.Rad2Deg;
 		}
 
-		private Vector3 WheelPosition(WheelCollider wheelCollider)
+		private static Vector3 WheelPosition(WheelCollider wheelCollider)
 		{
 			return wheelCollider.transform.TransformPoint(wheelCollider.center);
 		}
-
-		private Vector3 WheelRelativePosition(WheelCollider wheelCollider)
-		{
-			return Rigidbody.transform.InverseTransformPoint(WheelPosition(wheelCollider));
-		}
-
-		/*
-		private Vector3 WheelTransformPoint(WheelCollider wheelCollider, Vector3 point)
-		{
-
-		}
-
-		private Vector3 WheelInverseTransformPoint(WheelCollider wheelCollider, Vector3 point)
-		{
-
-		}
-		*/
 	}
 }
