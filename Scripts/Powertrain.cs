@@ -5,26 +5,43 @@ using UnityEngine;
 
 namespace Speedcar
 {
+	/// <summary>
+	/// 車両の動力系と伝動機構
+	/// </summary>
 	[RequireComponent(typeof(Suspension)), DisallowMultipleComponent]
 	public class Powertrain : MonoBehaviour
 	{
+		/// <summary>
+		/// トルク曲線の表現方法
+		/// </summary>
 		[SerializeField]
 		private TorqueCurveModel torqueCurveModel = TorqueCurveModel.Parametric;
 
+		/// <summary>
+		/// パラメトリックなトルク曲線
+		/// </summary>
+		[SerializeField]
+		private ParametricTorqueCurve parametricTorqueCurve;
 
-
-
+		/// <summary>
+		/// トルク曲線のアニメーションカーブ
+		/// </summary>
 		[SerializeField]
 		public AnimationCurve torqueAnimationCurve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1000, 10), new Keyframe(5000, 600), new Keyframe(7800, 800), new Keyframe(8000, 0));
 
-		[SerializeField, Range(0f, 5f)]
+		/// <summary>
+		/// トルクを定数倍するための乗数
+		/// </summary>
+		[SerializeField]
 		private float torqueMultiplier = 1f;
 
-		[SerializeField, Range(100f, 3000f)]
+		/// <summary>
+		/// アイドル時の回転数
+		/// </summary>
+		[SerializeField]
 		private float idlingRPM = 1000f;
 
-		[SerializeField]
-		private float redline = 7000f;
+
 
 		[SerializeField]
 		private float revLimit = 8000f;
@@ -36,33 +53,40 @@ namespace Speedcar
 		private float engineInertia = 0.1f;
 
 		[SerializeField]
-		private float engineDampingRate = 0.5f;
+		private float engineBrakingCoefficient = 0.5f;
 
 		[SerializeField]
 		private float wheelDampingRate = 0.08f;
 
 		[SerializeField]
-		private bool forcedInduction;
+		private float minPressure = 10000f;
+
+		[SerializeField]
+		private float maxPlainPressure = 101300f;
+
+		[SerializeField]
+		private bool hasForcedInduction;
 
 		[SerializeField]
 		private ForcedInduction forcedInductionDevice = ForcedInduction.Turbocharger;
 
 		[SerializeField]
-		private bool nitrous;
+		private float maxForcedInductionEfficiency = 1.7f;
 
 		[SerializeField]
-		private float nos;
+		private float maxAdditinalForcedPressure;
+
+		[SerializeField]
+		private float forcedPressureDeltaCoefficient;
 
 
 
-		//public Func<float, float> TorqueCurveOverrideFunction { get; set; } = null;
+		[SerializeField]
+		private bool hasNitrous;
 
+		[SerializeField]
+		private float nitrousEfficiency = 1.3f;
 
-		public float RPM { get; private set; }
-
-		public float Torque { get; private set; }
-
-		public float Pressure { get; private set; }
 
 
 
@@ -91,12 +115,319 @@ namespace Speedcar
 		[SerializeField]
 		private float centerDifferentialBalance = 0.5f;
 
+		[SerializeField]
+		private float clutchTime = 0.6f;
 
+		private float throttle;
 
+		private int gear = 1;
 
-		private Suspension Suspension { get; set; }
+		/// <summary>
+		/// トルク曲線の表現方法
+		/// </summary>
+		public TorqueCurveModel TorqueCurveModel
+		{
+			get
+			{
+				return torqueCurveModel;
+			}
+			set
+			{
+				torqueCurveModel = value;
+			}
+		}
 
+		/// <summary>
+		/// パラメトリックなトルク曲線
+		/// </summary>
+		public ParametricTorqueCurve ParametricTorqueCurve
+		{
+			get
+			{
+				return parametricTorqueCurve;
+			}
+			set
+			{
+				parametricTorqueCurve = value;
+			}
+		}
 
+		/// <summary>
+		/// トルク曲線のアニメーションカーブ
+		/// </summary>
+		public AnimationCurve TorqueAnimationCurve
+		{
+			get
+			{
+				return torqueAnimationCurve;
+			}
+			set
+			{
+				torqueAnimationCurve = value;
+			}
+		}
+
+		/// <summary>
+		/// トルクを定数倍するための乗数
+		/// </summary>
+		public float TorqueMultiplier
+		{
+			get
+			{
+				return torqueMultiplier;
+			}
+			set
+			{
+				torqueMultiplier = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// アイドル時の回転数
+		/// </summary>
+		public float IdlingRPM
+		{
+			get
+			{
+				return idlingRPM;
+			}
+			set
+			{
+				idlingRPM = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// 回転数の上限値
+		/// </summary>
+		public float RevLimit
+		{
+			get
+			{
+				return revLimit;
+			}
+			set
+			{
+				revLimit = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// 値として取りうる最大の回転数
+		/// </summary>
+		public float MaxRPM
+		{
+			get
+			{
+				return maxRPM;
+			}
+			set
+			{
+				maxRPM = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// エンジンの慣性モーメント
+		/// </summary>
+		public float EngineInertia
+		{
+			get
+			{
+				return engineInertia;
+			}
+			set
+			{
+				engineInertia = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// エンジンブレーキ係数
+		/// </summary>
+		public float EngineBrakingCoefficient
+		{
+			get
+			{
+				return engineBrakingCoefficient;
+			}
+			set
+			{
+				engineBrakingCoefficient = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// 車輪の減衰率
+		/// </summary>
+		public float WheelDampingRate
+		{
+			get
+			{
+				return wheelDampingRate;
+			}
+			set
+			{
+				wheelDampingRate = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// エンジンの最小圧力（絶対圧 Pa）
+		/// </summary>
+		public float MinPressure
+		{
+			get
+			{
+				return minPressure;
+			}
+			set
+			{
+				minPressure = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// 過給器なしの場合のエンジンの最大圧力（絶対圧 Pa）
+		/// </summary>
+		public float MaxPlainPressure
+		{
+			get
+			{
+				return maxPlainPressure;
+			}
+			set
+			{
+				maxPlainPressure = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public float MaxPressure
+		{
+			get
+			{
+				if (HasForcedInduction)
+				{
+					return MaxPlainPressure + MaxAdditionalForcedPressure;
+				}
+				else
+				{
+					return MaxPlainPressure;
+				}
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public bool HasForcedInduction
+		{
+			get
+			{
+				return hasForcedInduction;
+			}
+			set
+			{
+				hasForcedInduction = value;
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public ForcedInduction ForcedInductionDevice
+		{
+			get
+			{
+				return forcedInductionDevice;
+			}
+			set
+			{
+				forcedInductionDevice = value;
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public float MaxForcedInductionEfficiency
+		{
+			get
+			{
+				return maxForcedInductionEfficiency;
+			}
+			set
+			{
+				maxForcedInductionEfficiency = Mathf.Max(value, 1f);
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public float MaxAdditionalForcedPressure
+		{
+			get
+			{
+				return maxAdditinalForcedPressure;
+			}
+			set
+			{
+				maxAdditinalForcedPressure = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public float ForcedPressureDeltaCoefficient
+		{
+			get
+			{
+				return forcedPressureDeltaCoefficient;
+			}
+			set
+			{
+				forcedPressureDeltaCoefficient = Mathf.Max(value, 0f);
+			}
+		}
+		
+		/// <summary>
+		/// 亜酸化窒素噴射システムを搭載しているか
+		/// </summary>
+		private bool HasNitrous
+		{
+			get
+			{
+				return hasNitrous;
+			}
+			set
+			{
+				hasNitrous = value;
+			}
+		}
+
+		/// <summary>
+		/// 亜酸化窒素噴射時のトルク増幅
+		/// </summary>
+		public float NitrousEfficiency
+		{
+			get
+			{
+				return nitrousEfficiency;
+			}
+			set
+			{
+				nitrousEfficiency = Mathf.Max(value, 1f);
+			}
+		}
+
+		/// <summary>
+		/// 前進用の変速比のコレクション
+		/// </summary>
 		public IEnumerable<float> GearRatios
 		{
 			get
@@ -108,10 +439,13 @@ namespace Speedcar
 			}
 			set
 			{
-				gearRatios = value.ToArray();
+				gearRatios = value.Select(r => Mathf.Max(r, 0f)).ToArray();
 			}
 		}
 
+		/// <summary>
+		/// 後退用の変速比（正の値）
+		/// </summary>
 		public float ReverseGearRatio
 		{
 			get
@@ -120,10 +454,13 @@ namespace Speedcar
 			}
 			set
 			{
-
+				reverseGearRatio = Mathf.Max(value, 0f);
 			}
 		}
 
+		/// <summary>
+		/// 減速比
+		/// </summary>
 		public float FinalDriveRatio
 		{
 			get
@@ -132,49 +469,119 @@ namespace Speedcar
 			}
 			set
 			{
-
+				finalDriveRatio = Mathf.Max(value, 0f);
 			}
 		}
 
-
+		/// <summary>
+		/// 現在のギアの変速比
+		/// </summary>
 		public float CurrentGearRatio
 		{
 			get
 			{
-				if (gear == 0)
-				{
-					return 0f;
-				}
-				else if (gear == -1)
-				{
-					return reverseGearRatio;
-				}
-				else
-				{
-					return gearRatios[gear - 1];
-				}
+				return GearRatio(Gear);
 			}
 		}
 
+		/// <summary>
+		/// 最高ギアの番号
+		/// </summary>
 		public int TopGear => GearRatios.Count();
 
-
-		private int gear = 1;
-
-		public int Gear
+		/// <summary>
+		/// 駆動方式
+		/// </summary>
+		public Drivetrain Drivetrain
 		{
 			get
 			{
-				return gear;
+				return drivetrain;
 			}
 			set
 			{
-				gear = Mathf.Clamp(value, -1, gearRatios.Length);
+				drivetrain = value;
 			}
 		}
 
-		private float throttle;
+		/// <summary>
+		/// 前輪の差動の固定化（0=開放 1=固定）
+		/// </summary>
+		public float FrontDifferentialLocking
+		{
+			get
+			{
+				return frontDifferentialLocking;
+			}
+			set
+			{
+				frontDifferentialLocking = Mathf.Clamp01(value);
+			}
+		}
 
+		/// <summary>
+		/// 後輪の差動の固定化（0=開放 1=固定）
+		/// </summary>
+		public float RearDifferentialLocking
+		{
+			get
+			{
+				return rearDifferentialLocking;
+			}
+			set
+			{
+				rearDifferentialLocking = Mathf.Clamp01(value);
+			}
+		}
+
+		/// <summary>
+		/// トルクの前後分配の固定化（0=開放 1=固定 四輪駆動のみ）
+		/// </summary>
+		public float CenterDifferentialLocking
+		{
+			get
+			{
+				return centerDifferentialLocking;
+			}
+			set
+			{
+				centerDifferentialLocking = Mathf.Clamp01(value);
+			}
+		}
+
+		/// <summary>
+		/// トルクの前後分配の固定時の配分（0=すべて前 1=すべて後ろ 四輪駆動のみ）
+		/// </summary>
+		public float CenterDifferentialBalance
+		{
+			get
+			{
+				return centerDifferentialBalance;
+			}
+			set
+			{
+				centerDifferentialBalance = Mathf.Clamp01(value);
+			}
+		}
+
+		/// <summary>
+		/// クラッチをつなぐ時間
+		/// </summary>
+		public float ClutchTime
+		{
+			get
+			{
+				return clutchTime;
+			}
+			set
+			{
+				clutchTime = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// スロットル開度（0=全閉 1=全開）
+		/// </summary>
 		public float Throttle
 		{
 			get
@@ -187,17 +594,83 @@ namespace Speedcar
 			}
 		}
 
-		private bool nitrousEmission;
+		/// <summary>
+		/// 現在のギア
+		/// </summary>
+		public int Gear
+		{
+			get
+			{
+				return gear;
+			}
+			set
+			{
+				// 有効な範囲に丸める
+				int g = Mathf.Clamp(value, -1, TopGear);
+				// クラッチを切る
+				if (g != gear)
+				{
+					Clutch = 1f;
+				}
+				// 更新する
+				gear = g;
+			}
+		}
 
-		// Use this for initialization
+		/// <summary>
+		/// 亜酸化窒素を噴射しているか
+		/// </summary>
+		public bool Nitrous { get; set; }
+
+		/// <summary>
+		/// エンジン回転数
+		/// </summary>
+		public float RPM { get; private set; }
+
+		/// <summary>
+		/// 現在のエンジンの出力トルク（Nm）
+		/// </summary>
+		public float Torque { get; private set; }
+
+		/// <summary>
+		/// エンジンの内圧（絶対圧 Pa）
+		/// </summary>
+		public float Pressure { get; private set; }
+
+		/// <summary>
+		/// 亜酸化窒素残量（秒）
+		/// </summary>
+		public float RemainingNitrous { get; set; } = 3f;
+
+		/// <summary>
+		/// 亜酸化窒素によるトルク増幅
+		/// </summary>
+		private float NitrousCurrentEfficiency { get; set; }
+
+		/// <summary>
+		/// クラッチの状態（0=接続 1=断絶）
+		/// </summary>
+		private float Clutch { get; set; }
+
+		/// <summary>
+		/// 足回りのコンポーネント
+		/// </summary>
+		private Suspension Suspension { get; set; }
+
+		/// <summary>
+		/// 初期化時に呼ばれるメソッド
+		/// </summary>
 		private void Start()
 		{
 			Suspension = GetComponent<Suspension>();
 		}
 
-		// Update is called once per frame
+		/// <summary>
+		/// 毎物理フレームに呼ばれるメソッド
+		/// </summary>
 		private void FixedUpdate()
 		{
+			UpdateClutch();
 			UpdatePressure();
 			UpdateRPM();
 			UpdateTorque();
@@ -205,177 +678,235 @@ namespace Speedcar
 			ApplyWheelDamping();
 		}
 
-		private void UpdatePressure()
+		/// <summary>
+		/// クラッチを更新する
+		/// </summary>
+		private void UpdateClutch()
 		{
-
+			Clutch = Mathf.MoveTowards(Clutch, 0f, 1f / ClutchTime * Time.fixedDeltaTime);
 		}
 
+		/// <summary>
+		/// エンジンの内圧を更新する
+		/// </summary>
+		private void UpdatePressure()
+		{
+			// 過給器ありの場合
+			if (HasForcedInduction)
+			{
+				// 目標過給圧を求める
+				float target = Mathf.Lerp(MinPressure, MaxPressure, Throttle);
+				// ターボチャージャーの場合
+				if (ForcedInductionDevice == ForcedInduction.Turbocharger)
+				{
+					// 圧力の上昇速度は排気量に比例
+					if (target > Pressure)
+					{
+						Pressure = Mathf.MoveTowards(Pressure, target, ForcedPressureDeltaCoefficient * RPM * Throttle * Time.fixedDeltaTime);
+					}
+					// 圧力の減少は直ちに従う
+					else
+					{
+						Pressure = target;
+					}
+				}
+				// スーパーチャージャーの場合
+				else if (ForcedInductionDevice == ForcedInduction.Supercharger)
+				{
+					// 圧力の上昇速度は出力に比例
+					if (target > Pressure)
+					{
+						Pressure = Mathf.MoveTowards(Pressure, target, ForcedPressureDeltaCoefficient * Torque * Time.fixedDeltaTime);
+					}
+					// 圧力の減少は直ちに従う
+					else
+					{
+						Pressure = target;
+					}
+				}
+			}
+			// 自然吸気エンジンの場合
+			else
+			{
+				Pressure = Mathf.Lerp(MinPressure, MaxPressure, Throttle);
+			}
+		}
 
+		/// <summary>
+		/// エンジン回転数を更新する
+		/// </summary>
 		private void UpdateRPM()
 		{
-			// 
-			if (gear != 0)
+			// Nレンジ以外の場合
+			if (Gear != 0)
 			{
-				// 
+				// 駆動輪のRPMを計算する
 				float wheelRPM = 0f;
-				switch (drivetrain)
+				switch (Drivetrain)
 				{
-					// 
+					// 前輪駆動の場合
 					case Drivetrain.FWD:
 						wheelRPM = Suspension.FrontWheelColliders.Average(x => x.rpm);
 						break;
-					// 
+					// 後輪駆動の場合
 					case Drivetrain.RWD:
 						wheelRPM = Suspension.RearWheelColliders.Average(x => x.rpm);
 						break;
-					// 
+					// 四輪駆動の場合
 					case Drivetrain.AWD:
 						float frontWheelRPM = Suspension.FrontWheelColliders.Average(x => x.rpm);
 						float rearWheelRPM = Suspension.RearWheelColliders.Average(x => x.rpm);
 						wheelRPM = (frontWheelRPM + rearWheelRPM) / 2f;
 						break;
 				}
-				// 
-				float rpm = Transmission(wheelRPM);
-
-
-				// TODO
-				rpm = Mathf.Lerp(rpm, RPM, 0.5f);
-
-				// TODO
-				RPM = Mathf.Clamp(rpm, idlingRPM, maxRPM);
+				// エンジン回転数に変換
+				float rpm = Transmission(wheelRPM) + IdlingRPM;
+				// クラッチ代わりの近似を行う
+				rpm = Mathf.Lerp(RPM, rpm, Clutch);
+				// 有効な範囲に丸めて更新
+				RPM = Mathf.Clamp(rpm, IdlingRPM, MaxRPM);
 			}
-			// 
+			// Nレンジの場合
 			else
 			{
-				// 
-				float rpm = RPM + Torque / engineInertia * Time.fixedDeltaTime / (2f * Mathf.PI);
-
-				// 負圧 TODO
-				rpm = rpm - 0f;
-
-				// 抵抗
-				rpm = rpm * (1 - Time.fixedDeltaTime * engineDampingRate);
-
-				RPM = Mathf.Clamp(rpm, idlingRPM, maxRPM);
+				// 角加速度から回転数を更新
+				float rpm = RPM + Torque / EngineInertia * Time.fixedDeltaTime / (2f * Mathf.PI);
+				// エンジンブレーキを適用
+				rpm = rpm * (1 - Time.fixedDeltaTime * Mathf.InverseLerp(MaxPlainPressure, MinPressure, Pressure) * EngineBrakingCoefficient);
+				// 有効な範囲に丸めて更新
+				RPM = Mathf.Clamp(rpm, IdlingRPM, MaxRPM);
 			}
 		}
 
-		
+		/// <summary>
+		/// 亜酸化窒素噴射システムを更新
+		/// </summary>
+		private void UpdateNitrous()
+		{
+			if (HasNitrous && RemainingNitrous > 0f && Nitrous)
+			{
+				NitrousCurrentEfficiency = NitrousEfficiency;
+				RemainingNitrous = Mathf.Max(RemainingNitrous - Time.fixedDeltaTime, 0f);
+			}
+			else
+			{
+				NitrousCurrentEfficiency = 1f;
+			}
+		}
+
+		/// <summary>
+		/// 出力トルクを更新する
+		/// </summary>
 		private void UpdateTorque()
 		{
-			//
-			float torque = throttle * CalculateTorqueAt(RPM);
-			// 過給機による増幅を
-			if (forcedInduction)
+			// 素のトルクを計算
+			float torque = Throttle * CalculatePlainTorqueAt(RPM);
+			// 過給機による増幅を適用
+			if (HasForcedInduction)
 			{
-
+				torque *= InterpolateForcedInductionEfficiency(Pressure);
 			}
-			// ナイトロ
-			if (nitrous)
+			// ナイトロによる増幅を適用
+			if (HasNitrous)
 			{
-
+				torque *= NitrousCurrentEfficiency;
 			}
-			// エンジンからの出力トルクをプロパティに保存
+			// エンジンからの出力トルクのプロパティを更新
 			Torque = torque;
 		}
 
 		/// <summary>
-		/// 
+		/// 駆動方式の違いよって構成が異なるデフを通じてトルクを伝達する
 		/// </summary>
 		private void ApplyTorque()
 		{
 			// 変速機を通してトルクを変換
 			float torque = Transmission(Torque);
-			// 駆動方式の違いよって構成が異なるデフを通じてトルクを伝達
-			switch (drivetrain)
+			// 前輪駆動の場合
+			if (Drivetrain == Drivetrain.FWD)
 			{
-				// 前輪駆動の場合
-				case Drivetrain.FWD:
-					// 前輪のデフを通してトルクを伝達
-					float frontLeftRPM = Math.Abs(Suspension.FrontLeftWheelCollider.rpm);
-					float frontRightRPM = Mathf.Abs(Suspension.FrontRightWheelCollider.rpm);
-					float frontLeftOpenTorque = (frontLeftRPM + frontRightRPM > 1f) ? torque * frontLeftRPM / (frontLeftRPM + frontRightRPM) : torque / 2f;
-					float frontRightOpenTorque = (frontLeftRPM + frontRightRPM > 1f) ? torque * frontRightRPM / (frontLeftRPM + frontRightRPM) : torque / 2f;
-					float frontLeftLockedTorque = torque / 2f;
-					float frontRightLockedTorque = torque / 2f;
-					Suspension.FrontLeftWheelCollider.motorTorque = Mathf.Lerp(frontLeftOpenTorque, frontLeftLockedTorque, frontDifferentialLocking);
-					Suspension.FrontRightWheelCollider.motorTorque = Mathf.Lerp(frontRightOpenTorque, frontRightLockedTorque, frontDifferentialLocking);
-					// 後輪に動力は伝わらない
-					foreach (var wheelCollider in Suspension.RearWheelColliders)
-					{
-						wheelCollider.motorTorque = 0f;
-					}
-					break;
-				// 後輪駆動の場合
-				case Drivetrain.RWD:
-					// 後輪のデフを通してトルクを伝達
-					float rearLeftRPM = Math.Abs(Suspension.RearLeftWheelCollider.rpm);
-					float rearRightRPM = Mathf.Abs(Suspension.RearRightWheelCollider.rpm);
-					float rearLeftOpenTorque = (rearLeftRPM + rearRightRPM > 1f) ? torque * rearLeftRPM / (rearLeftRPM + rearRightRPM) : torque / 2f;
-					float rearRightOpenTorque = (rearLeftRPM + rearRightRPM > 1f) ? torque * rearRightRPM / (rearLeftRPM + rearRightRPM) : torque / 2f;
-					float rearLeftLockedTorque = torque / 2f;
-					float rearRightLockedTorque = torque / 2f;
-					Suspension.RearLeftWheelCollider.motorTorque = Mathf.Lerp(rearLeftOpenTorque, rearLeftLockedTorque, rearDifferentialLocking);
-					Suspension.RearRightWheelCollider.motorTorque = Mathf.Lerp(rearRightOpenTorque, rearRightLockedTorque, rearDifferentialLocking);
-					// 前輪に動力は伝わらない
-					foreach (var wheelCollider in Suspension.FrontWheelColliders)
-					{
-						wheelCollider.motorTorque = 0f;
-					}
-					break;
-				// 四輪駆動の場合
-				case Drivetrain.AWD:
-					// センターデフの動作を再現
-					float frontRPM = Math.Abs(Suspension.FrontWheelColliders.Average(x => x.rpm));
-					float rearRPM = Math.Abs(Suspension.RearWheelColliders.Average(x => x.rpm));
-					float frontOpenTorque = (frontRPM + rearRPM > 1f) ? torque * frontRPM / (frontRPM + rearRPM) : torque / 2f;
-					float rearOpenTorque = (frontRPM + rearRPM > 1f) ? torque * rearRPM / (frontRPM + rearRPM) : torque / 2f;
-					float frontLockedTorque = Mathf.Lerp(torque, 0f, centerDifferentialBalance);
-					float rearLockedTorque = Mathf.Lerp(0f, torque, centerDifferentialBalance);
-					float frontTorque = Mathf.Lerp(frontOpenTorque, frontLockedTorque, centerDifferentialLocking);
-					float rearTorque = Mathf.Lerp(rearOpenTorque, rearLockedTorque, centerDifferentialLocking);
-					// 前輪のデフを通してトルクを伝達
-					frontLeftRPM = Math.Abs(Suspension.FrontLeftWheelCollider.rpm);
-					frontRightRPM = Mathf.Abs(Suspension.FrontRightWheelCollider.rpm);
-					frontLeftOpenTorque = (frontLeftRPM + frontRightRPM > 1f) ? frontTorque * frontLeftRPM / (frontLeftRPM + frontRightRPM) : frontTorque / 2f;
-					frontRightOpenTorque = (frontLeftRPM + frontRightRPM > 1f) ? frontTorque * frontRightRPM / (frontLeftRPM + frontRightRPM) : frontTorque / 2f;
-					frontLeftLockedTorque = frontTorque / 2f;
-					frontRightLockedTorque = frontTorque / 2f;
-					Suspension.FrontLeftWheelCollider.motorTorque = Mathf.Lerp(frontLeftOpenTorque, frontLeftLockedTorque, frontDifferentialLocking);
-					Suspension.FrontRightWheelCollider.motorTorque = Mathf.Lerp(frontRightOpenTorque, frontRightLockedTorque, frontDifferentialLocking);
-					// 後輪のデフを通してトルクを伝達
-					rearLeftRPM = Math.Abs(Suspension.RearLeftWheelCollider.rpm);
-					rearRightRPM = Mathf.Abs(Suspension.RearRightWheelCollider.rpm);
-					rearLeftOpenTorque = (rearLeftRPM + rearRightRPM > 1f) ? rearTorque * rearLeftRPM / (rearLeftRPM + rearRightRPM) : rearTorque / 2f;
-					rearRightOpenTorque = (rearLeftRPM + rearRightRPM > 1f) ? rearTorque * rearRightRPM / (rearLeftRPM + rearRightRPM) : rearTorque / 2f;
-					rearLeftLockedTorque = rearTorque / 2f;
-					rearRightLockedTorque = rearTorque / 2f;
-					Suspension.RearLeftWheelCollider.motorTorque = Mathf.Lerp(rearLeftOpenTorque, rearLeftLockedTorque, rearDifferentialLocking);
-					Suspension.RearRightWheelCollider.motorTorque = Mathf.Lerp(rearRightOpenTorque, rearRightLockedTorque, rearDifferentialLocking);
-					break;
+				// 前輪のデフを通してトルクを伝達
+				float frontLeftRPM = Math.Abs(Suspension.FrontLeftWheelCollider.rpm);
+				float frontRightRPM = Mathf.Abs(Suspension.FrontRightWheelCollider.rpm);
+				float frontLeftOpenTorque = (frontLeftRPM + frontRightRPM > 1f) ? torque * frontLeftRPM / (frontLeftRPM + frontRightRPM) : torque / 2f;
+				float frontRightOpenTorque = (frontLeftRPM + frontRightRPM > 1f) ? torque * frontRightRPM / (frontLeftRPM + frontRightRPM) : torque / 2f;
+				float frontLeftLockedTorque = torque / 2f;
+				float frontRightLockedTorque = torque / 2f;
+				Suspension.FrontLeftWheelCollider.motorTorque = Mathf.Lerp(frontLeftOpenTorque, frontLeftLockedTorque, FrontDifferentialLocking);
+				Suspension.FrontRightWheelCollider.motorTorque = Mathf.Lerp(frontRightOpenTorque, frontRightLockedTorque, FrontDifferentialLocking);
+				// 後輪に動力は伝わらない
+				foreach (var wheelCollider in Suspension.RearWheelColliders)
+				{
+					wheelCollider.motorTorque = 0f;
+				}
+			}
+			// 後輪駆動の場合
+			else if (Drivetrain == Drivetrain.RWD)
+			{
+				// 後輪のデフを通してトルクを伝達
+				float rearLeftRPM = Math.Abs(Suspension.RearLeftWheelCollider.rpm);
+				float rearRightRPM = Mathf.Abs(Suspension.RearRightWheelCollider.rpm);
+				float rearLeftOpenTorque = (rearLeftRPM + rearRightRPM > 1f) ? torque * rearLeftRPM / (rearLeftRPM + rearRightRPM) : torque / 2f;
+				float rearRightOpenTorque = (rearLeftRPM + rearRightRPM > 1f) ? torque * rearRightRPM / (rearLeftRPM + rearRightRPM) : torque / 2f;
+				float rearLeftLockedTorque = torque / 2f;
+				float rearRightLockedTorque = torque / 2f;
+				Suspension.RearLeftWheelCollider.motorTorque = Mathf.Lerp(rearLeftOpenTorque, rearLeftLockedTorque, RearDifferentialLocking);
+				Suspension.RearRightWheelCollider.motorTorque = Mathf.Lerp(rearRightOpenTorque, rearRightLockedTorque, RearDifferentialLocking);
+				// 前輪に動力は伝わらない
+				foreach (var wheelCollider in Suspension.FrontWheelColliders)
+				{
+					wheelCollider.motorTorque = 0f;
+				}
+			}
+			// 四輪駆動の場合
+			else if (Drivetrain == Drivetrain.AWD)
+			{
+				// センターデフの動作を再現
+				float frontRPM = Math.Abs(Suspension.FrontWheelColliders.Average(x => x.rpm));
+				float rearRPM = Math.Abs(Suspension.RearWheelColliders.Average(x => x.rpm));
+				float frontOpenTorque = (frontRPM + rearRPM > 1f) ? torque * frontRPM / (frontRPM + rearRPM) : torque / 2f;
+				float rearOpenTorque = (frontRPM + rearRPM > 1f) ? torque * rearRPM / (frontRPM + rearRPM) : torque / 2f;
+				float frontLockedTorque = Mathf.Lerp(torque, 0f, CenterDifferentialBalance);
+				float rearLockedTorque = Mathf.Lerp(0f, torque, CenterDifferentialBalance);
+				float frontTorque = Mathf.Lerp(frontOpenTorque, frontLockedTorque, CenterDifferentialLocking);
+				float rearTorque = Mathf.Lerp(rearOpenTorque, rearLockedTorque, CenterDifferentialLocking);
+				// 前輪のデフを通してトルクを伝達
+				float frontLeftRPM = Math.Abs(Suspension.FrontLeftWheelCollider.rpm);
+				float frontRightRPM = Mathf.Abs(Suspension.FrontRightWheelCollider.rpm);
+				float frontLeftOpenTorque = (frontLeftRPM + frontRightRPM > 1f) ? frontTorque * frontLeftRPM / (frontLeftRPM + frontRightRPM) : frontTorque / 2f;
+				float frontRightOpenTorque = (frontLeftRPM + frontRightRPM > 1f) ? frontTorque * frontRightRPM / (frontLeftRPM + frontRightRPM) : frontTorque / 2f;
+				float frontLeftLockedTorque = frontTorque / 2f;
+				float frontRightLockedTorque = frontTorque / 2f;
+				Suspension.FrontLeftWheelCollider.motorTorque = Mathf.Lerp(frontLeftOpenTorque, frontLeftLockedTorque, FrontDifferentialLocking);
+				Suspension.FrontRightWheelCollider.motorTorque = Mathf.Lerp(frontRightOpenTorque, frontRightLockedTorque, FrontDifferentialLocking);
+				// 後輪のデフを通してトルクを伝達
+				float rearLeftRPM = Math.Abs(Suspension.RearLeftWheelCollider.rpm);
+				float rearRightRPM = Mathf.Abs(Suspension.RearRightWheelCollider.rpm);
+				float rearLeftOpenTorque = (rearLeftRPM + rearRightRPM > 1f) ? rearTorque * rearLeftRPM / (rearLeftRPM + rearRightRPM) : rearTorque / 2f;
+				float rearRightOpenTorque = (rearLeftRPM + rearRightRPM > 1f) ? rearTorque * rearRightRPM / (rearLeftRPM + rearRightRPM) : rearTorque / 2f;
+				float rearLeftLockedTorque = rearTorque / 2f;
+				float rearRightLockedTorque = rearTorque / 2f;
+				Suspension.RearLeftWheelCollider.motorTorque = Mathf.Lerp(rearLeftOpenTorque, rearLeftLockedTorque, RearDifferentialLocking);
+				Suspension.RearRightWheelCollider.motorTorque = Mathf.Lerp(rearRightOpenTorque, rearRightLockedTorque, RearDifferentialLocking);
 			}
 		}
 
 		/// <summary>
-		/// 
+		/// 車輪の減衰とエンジンブレーキをシミュレートする
 		/// </summary>
 		private void ApplyWheelDamping()
 		{
-			// 
-			if (gear != 0)
+			// Nレンジ以外の場合
+			if (Gear != 0)
 			{
-				//
-				float dampingByEngineBraking = 0f;
-
-				// 
-				float dampingByEngineFriction = 0f;
-
-				float totalDamping = wheelDampingRate + dampingByEngineBraking + dampingByEngineFriction;
-				// 
-				switch (drivetrain)
+				// エンジンブレーキによる減衰を近似で求める
+				float dampingByEngineBraking = Mathf.InverseLerp(MaxPlainPressure, MinPressure, Pressure) * EngineBrakingCoefficient;
+				// 車輪の素の減衰と合わせる
+				float totalDamping = WheelDampingRate + dampingByEngineBraking;
+				// エンジンブレーキは駆動輪にのみ適用
+				switch (Drivetrain)
 				{
-					// 
+					// 前輪駆動の場合
 					case Drivetrain.FWD:
 						foreach (var wheelCollider in Suspension.FrontWheelColliders)
 						{
@@ -383,21 +914,21 @@ namespace Speedcar
 						}
 						foreach (var wheelCollider in Suspension.RearWheelColliders)
 						{
-							wheelCollider.wheelDampingRate = wheelDampingRate;
+							wheelCollider.wheelDampingRate = WheelDampingRate;
 						}
 						break;
-					// 
+					// 後輪駆動の場合
 					case Drivetrain.RWD:
 						foreach (var wheelCollider in Suspension.FrontWheelColliders)
 						{
-							wheelCollider.wheelDampingRate = wheelDampingRate;
+							wheelCollider.wheelDampingRate = WheelDampingRate;
 						}
 						foreach (var wheelCollider in Suspension.RearWheelColliders)
 						{
 							wheelCollider.wheelDampingRate = totalDamping;
 						}
 						break;
-					// 
+					// 四輪駆動の場合
 					case Drivetrain.AWD:
 						foreach (var wheelCollider in Suspension.WheelColliders)
 						{
@@ -406,58 +937,133 @@ namespace Speedcar
 						break;
 				}
 			}
-			// 
+			// Nレンジの場合
 			else
 			{
-				// 
+				// 素の減衰を適用
 				foreach (var wheelCollider in Suspension.WheelColliders)
 				{
-					wheelCollider.wheelDampingRate = wheelDampingRate;
+					wheelCollider.wheelDampingRate = WheelDampingRate;
 				}
 			}
 		}
 
-		private float CalculateTorqueAt(float rpm)
+		/// <summary>
+		/// ある回転数における過給を含まないトルクを返す
+		/// </summary>
+		/// <param name="rpm">エンジン回転数</param>
+		/// <returns>エンジン出力トルク</returns>
+		private float CalculatePlainTorqueAt(float rpm)
 		{
 			float torque = 0f;
-			switch (torqueCurveModel)
+			switch (TorqueCurveModel)
 			{
 				case TorqueCurveModel.Parametric:
-
-					/*TODO*/
-					torque = 0f;
+					torque = ParametricTorqueCurve != null ? ParametricTorqueCurve.EngineTorque(rpm) : 0f;
 					break;
 				case TorqueCurveModel.AnimationCurve:
-					torque = torqueAnimationCurve != null && torqueAnimationCurve.length > 0 ? torqueAnimationCurve.Evaluate(rpm) : 0f;
+					torque = TorqueAnimationCurve != null && TorqueAnimationCurve.length > 0 ? TorqueAnimationCurve.Evaluate(rpm) : 0f;
 					break;
 			}
-			return torque * torqueMultiplier;
+			return torque * TorqueMultiplier;
 		}
 
+		/// <summary>
+		/// 過給器によるトルク増幅を近似補間する（増幅されないときは等倍を返す）
+		/// </summary>
+		/// <param name="pressure">過給圧</param>
+		/// <returns>トルク増幅値</returns>
+		private float InterpolateForcedInductionEfficiency(float pressure)
+		{
+			if (pressure < MaxPlainPressure)
+			{
+				return 1f;
+			}
+			else
+			{
+				float t = Mathf.InverseLerp(MaxPlainPressure, MaxPressure, pressure);
+				float d = Mathf.Lerp(1f, MaxForcedInductionEfficiency, t);
+				return Mathf.Lerp(d, MaxForcedInductionEfficiency, t);
+			}
+		}
+
+		/// <summary>
+		/// 変速比を返す
+		/// </summary>
+		/// <param name="gear">ギア番号</param>
+		/// <returns>変速比</returns>
+		private float GearRatio(int gear)
+		{
+			if (gear == 0)
+			{
+				return 0f;
+			}
+			else if (gear == -1)
+			{
+				return ReverseGearRatio;
+			}
+			else
+			{
+				return GearRatios.ElementAt(gear - 1);
+			}
+		}
+
+		/// <summary>
+		/// 値を変速にかける
+		/// </summary>
+		/// <param name="v">値</param>
+		/// <returns>変速した値</returns>
 		private float Transmission(float v)
 		{
-			return v * finalDriveRatio * CurrentGearRatio;
+			return v * FinalDriveRatio * CurrentGearRatio;
 		}
 
+		/// <summary>
+		/// 値を特定のギアで変速にかける
+		/// </summary>
+		/// <param name="v">値</param>
+		/// <param name="gear">ギア番号</param>
+		/// <returns>変速した値</returns>
 		private float Transmission(float v, int gear)
 		{
-			return v * finalDriveRatio * gearRatios[gear - 1];
+			return v * FinalDriveRatio * GearRatio(gear);
 		}
 
+		/// <summary>
+		/// 値を逆変速にかける
+		/// </summary>
+		/// <param name="v">値</param>
+		/// <returns>逆変速した値</returns>
+		private float InverseTransmission(float v)
+		{
+			return v / FinalDriveRatio / CurrentGearRatio;
+		}
+
+		/// <summary>
+		/// 現在の回転数で最大トルクを発生するギアを返す（ドライブレンジにないときは現在のギアを返す）
+		/// </summary>
+		/// <returns>最大トルクを発生するギア番号または現在のギア番号</returns>
 		public int MaxTorqueGear()
 		{
-			int max = 0;
-			float maxTorque = 0f;
-			for (int g = 1; g <= gearRatios.Length; g++)
+			if (Gear != 0 && Gear != -1)
 			{
-				float torque = Transmission(RPM, g);
-				if (maxTorque < torque)
+				int max = 0;
+				float maxTorque = 0f;
+				for (int g = 1; g <= TopGear; g++)
 				{
-					max = g;
-					maxTorque = torque;
+					float torque = InverseTransmission(Transmission(CalculatePlainTorqueAt(Transmission(InverseTransmission(RPM), g)), g));
+					if (maxTorque < torque)
+					{
+						max = g;
+						maxTorque = torque;
+					}
 				}
+				return max;
 			}
-			return max;
+			else
+			{
+				return Gear;
+			}
 		}
 	}
 }
