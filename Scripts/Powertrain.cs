@@ -762,7 +762,7 @@ namespace Speedcar
 				// エンジン回転数に変換
 				float rpm = Transmission(wheelRPM) + IdlingRPM;
 				// クラッチ代わりの近似を行う
-				rpm = Mathf.Lerp(RPM, rpm, Clutch);
+				rpm = Mathf.Lerp(rpm, RPM, Clutch);
 				// 有効な範囲に丸めて更新
 				RPM = Mathf.Clamp(rpm, IdlingRPM, MaxRPM);
 			}
