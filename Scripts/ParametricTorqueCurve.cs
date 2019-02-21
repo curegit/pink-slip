@@ -10,12 +10,6 @@ namespace Speedcar
 	public class ParametricTorqueCurve
 	{
 		/// <summary>
-		/// パワーバンド上限の回転数のバッキングフィールド
-		/// </summary>
-		[SerializeField]
-		private float maxRPM = 6400f;
-
-		/// <summary>
 		/// トルクの最大値のバッキングフィールド
 		/// </summary>
 		[SerializeField]
@@ -28,31 +22,16 @@ namespace Speedcar
 		private float maxTorqueRPM = 5000f;
 
 		/// <summary>
-		/// 仕事率の最大値のバッキングフィールド
+		/// 
 		/// </summary>
 		[SerializeField]
-		private float maxPower = 320000f;
+		private float asymptoteTorque = 400f;
 
 		/// <summary>
-		/// 仕事率が最大値をとる回転数のバッキングフィールド
+		/// 
 		/// </summary>
 		[SerializeField]
-		private float maxPowerRPM = 6000f;
-
-		/// <summary>
-		/// パワーバンド上限の回転数
-		/// </summary>
-		public float MaxRPM
-		{
-			get
-			{
-				return maxRPM;
-			}
-			set
-			{
-				maxRPM = Mathf.Max(value, 0f);
-			}
-		}
+		private float redline = 7000f;
 
 		/// <summary>
 		/// トルクの最大値
@@ -85,32 +64,32 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 仕事率の最大値
+		/// 
 		/// </summary>
-		public float MaxPower
+		public float AsymptoteTorque
 		{
 			get
 			{
-				return maxPower;
+				return asymptoteTorque;
 			}
 			set
 			{
-				maxPower = Mathf.Max(value, 0f);
+				asymptoteTorque = Mathf.Max(value, 0f);
 			}
 		}
 
 		/// <summary>
-		/// 仕事率が最大値をとる回転数
+		/// 
 		/// </summary>
-		public float MaxPowerRPM
+		public float Redline
 		{
 			get
 			{
-				return maxPowerRPM;
+				return redline;
 			}
 			set
 			{
-				maxPowerRPM = Mathf.Max(value, 0f);
+				redline = Mathf.Max(value, 0f);
 			}
 		}
 
@@ -129,19 +108,14 @@ namespace Speedcar
 			{
 				return MaxTorque * (-Mathf.Pow(rpm / MaxTorqueRPM - 1f, 2f) + 1f);
 			}
+			else if (rpm < Redline)
+			{
+				float t = Mathf.InverseLerp(MaxTorqueRPM, Redline, rpm);
+				return (0.5f * Mathf.Cos(t * Mathf.PI) + 0.5f) * (MaxTorque - AsymptoteTorque) + AsymptoteTorque;
+			}
 			else
 			{
-				float maxPowerTorque = MaxPower / (MaxPowerRPM * 2f * Mathf.PI / 60);
-				float aproxFactor = (MaxTorque - maxPowerTorque) / (2f * MaxTorqueRPM * MaxPowerRPM - Mathf.Pow(MaxPowerRPM, 2f) - Mathf.Pow(MaxTorqueRPM, 2f));
-				float torque = Mathf.Max(aproxFactor * Mathf.Pow(rpm - MaxTorqueRPM, 2f) + MaxTorque, 0f);
-				if (rpm > MaxRPM)
-				{
-					return Mathf.Max(torque * (1f - ((rpm - MaxRPM) * 0.001f)), 0f);
-				}
-				else
-				{
-					return torque;
-				}
+				return AsymptoteTorque;
 			}
 		}
 	}
