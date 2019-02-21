@@ -21,7 +21,7 @@ namespace Speedcar
 		/// パラメトリックなトルク曲線
 		/// </summary>
 		[SerializeField]
-		private ParametricTorqueCurve parametricTorqueCurve;
+		private ParametricTorqueCurve parametricTorqueCurve = new ParametricTorqueCurve();
 
 		/// <summary>
 		/// トルク曲線のアニメーションカーブ
@@ -41,22 +41,23 @@ namespace Speedcar
 		[SerializeField]
 		private float idlingRPM = 1000f;
 
-
-
+		/// <summary>
+		/// レブリミット
+		/// </summary>
 		[SerializeField]
 		private float revLimit = 8000f;
 
 		[SerializeField]
-		private float maxRPM = 10000f;
+		private float maxRPM = 12000f;
 
 		[SerializeField]
-		private float engineInertia = 0.1f;
+		private float engineInertia = 0.01f;
 
 		[SerializeField]
-		private float engineBrakingCoefficient = 0.5f;
+		private float engineBrakingCoefficient = 10.5f;
 
 		[SerializeField]
-		private float wheelDampingRate = 0.08f;
+		private float wheelDampingRate = 0.15f;
 
 		[SerializeField]
 		private float minPressure = 10000f;
@@ -71,10 +72,10 @@ namespace Speedcar
 		private ForcedInduction forcedInductionDevice = ForcedInduction.Turbocharger;
 
 		[SerializeField]
-		private float maxForcedInductionEfficiency = 1.7f;
+		private float maxForcedInductionEfficiency = 1.45f;
 
 		[SerializeField]
-		private float maxAdditinalForcedPressure;
+		private float maxAdditionalForcedPressure;
 
 		[SerializeField]
 		private float forcedPressureDeltaCoefficient;
@@ -85,7 +86,7 @@ namespace Speedcar
 		private bool hasNitrous;
 
 		[SerializeField]
-		private float nitrousEfficiency = 1.3f;
+		private float nitrousEfficiency = 1.6f;
 
 
 
@@ -104,16 +105,16 @@ namespace Speedcar
 		private Drivetrain drivetrain = Drivetrain.AWD;
 
 		[SerializeField]
-		private float frontDifferentialLocking = 0f;
+		private float frontDifferentialLocking = 0.5f;
 
 		[SerializeField]
-		private float rearDifferentialLocking = 0f;
+		private float rearDifferentialLocking = 0.5f;
 
 		[SerializeField]
-		private float centerDifferentialLocking = 0f;
+		private float centerDifferentialLocking = 1f;
 
 		[SerializeField]
-		private float centerDifferentialBalance = 0.5f;
+		private float centerDifferentialBalance = 0.6f;
 
 		[SerializeField]
 		private float clutchTime = 0.6f;
@@ -372,11 +373,11 @@ namespace Speedcar
 		{
 			get
 			{
-				return maxAdditinalForcedPressure;
+				return maxAdditionalForcedPressure;
 			}
 			set
 			{
-				maxAdditinalForcedPressure = Mathf.Max(value, 0f);
+				maxAdditionalForcedPressure = Mathf.Max(value, 0f);
 			}
 		}
 
@@ -673,6 +674,7 @@ namespace Speedcar
 			UpdateClutch();
 			UpdatePressure();
 			UpdateRPM();
+			UpdateNitrous();
 			UpdateTorque();
 			ApplyTorque();
 			ApplyWheelDamping();
@@ -716,7 +718,7 @@ namespace Speedcar
 					// 圧力の上昇速度は出力に比例
 					if (target > Pressure)
 					{
-						Pressure = Mathf.MoveTowards(Pressure, target, ForcedPressureDeltaCoefficient * Torque * Time.fixedDeltaTime);
+						Pressure = Mathf.MoveTowards(Pressure, target, ForcedPressureDeltaCoefficient * Torque * 10f * Time.fixedDeltaTime);
 					}
 					// 圧力の減少は直ちに従う
 					else
@@ -772,7 +774,7 @@ namespace Speedcar
 				// 角加速度から回転数を更新
 				float rpm = RPM + Torque / EngineInertia * Time.fixedDeltaTime / (2f * Mathf.PI);
 				// エンジンブレーキを適用
-				rpm = rpm * (1 - Time.fixedDeltaTime * Mathf.InverseLerp(MaxPlainPressure, MinPressure, Pressure) * EngineBrakingCoefficient);
+				rpm = rpm * (1f - Time.fixedDeltaTime * Mathf.InverseLerp(MaxPlainPressure, MinPressure, Pressure) * Mathf.InverseLerp(0f, MaxRPM, RPM) * EngineBrakingCoefficient);
 				// 有効な範囲に丸めて更新
 				RPM = Mathf.Clamp(rpm, IdlingRPM, MaxRPM);
 			}
@@ -801,6 +803,8 @@ namespace Speedcar
 		{
 			// 素のトルクを計算
 			float torque = Throttle * CalculatePlainTorqueAt(RPM);
+			// レブリミットを超えていないか検査する
+			torque = RPM > RevLimit ? 0f : torque;
 			// 過給機による増幅を適用
 			if (HasForcedInduction)
 			{
@@ -900,9 +904,11 @@ namespace Speedcar
 			if (Gear != 0)
 			{
 				// エンジンブレーキによる減衰を近似で求める
-				float dampingByEngineBraking = Mathf.InverseLerp(MaxPlainPressure, MinPressure, Pressure) * EngineBrakingCoefficient;
+				float dampingByEngineBraking = Mathf.InverseLerp(MaxPlainPressure, MinPressure, Pressure) * Mathf.InverseLerp(0f, MaxRPM, RPM) * EngineBrakingCoefficient;
+				// 
+				float damping = RPM + 1f > MaxRPM ? Mathf.Pow(EngineBrakingCoefficient, 2f) : 0f;
 				// 車輪の素の減衰と合わせる
-				float totalDamping = WheelDampingRate + dampingByEngineBraking;
+				float totalDamping = WheelDampingRate + dampingByEngineBraking + damping;
 				// エンジンブレーキは駆動輪にのみ適用
 				switch (Drivetrain)
 				{
