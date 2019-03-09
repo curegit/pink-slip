@@ -45,6 +45,18 @@ namespace Speedcar
 		private float maxDownforce = 12000f;
 
 		/// <summary>
+		/// 速度に比例する空気抵抗の係数
+		/// </summary>
+		[SerializeField]
+		private Vector3 linearDrag = new Vector3(1.0f, 2.0f, 0.25f);
+
+		/// <summary>
+		/// 速度の二乗に比例する空気抵抗の係数
+		/// </summary>
+		[SerializeField]
+		private Vector3 quadraticDrag = new Vector3(3.0f, 4.0f, 0.5f);
+
+		/// <summary>
 		/// 角速度の大きさの上限のバッキングフィールド
 		/// </summary>
 		[SerializeField]
@@ -171,6 +183,42 @@ namespace Speedcar
 		}
 
 		/// <summary>
+		/// 速度に比例する空気抵抗の係数
+		/// </summary>
+		public Vector3 LinearDrag
+		{
+			get
+			{
+				return linearDrag;
+			}
+			set
+			{
+				value.x = Mathf.Max(value.x, 0f);
+				value.y = Mathf.Max(value.y, 0f);
+				value.z = Mathf.Max(value.z, 0f);
+				linearDrag = value;
+			}
+		}
+
+		/// <summary>
+		/// 速度の二乗に比例する空気抵抗の係数
+		/// </summary>
+		public Vector3 QuadraticDrag
+		{
+			get
+			{
+				return quadraticDrag;
+			}
+			set
+			{
+				value.x = Mathf.Max(value.x, 0f);
+				value.y = Mathf.Max(value.y, 0f);
+				value.z = Mathf.Max(value.z, 0f);
+				quadraticDrag = value;
+			}
+		}
+
+		/// <summary>
 		/// 角速度の大きさの上限
 		/// </summary>
 		public float MaxAngularSpeed
@@ -246,14 +294,19 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// このフレームの車体のz軸方向の速度
-		/// </summary>
-		public float ForwardVelocity { get; private set; }
-
-		/// <summary>
 		/// このフレームの車体のx軸方向の速度
 		/// </summary>
 		public float SidewayVelocity { get; private set; }
+
+		/// <summary>
+		/// このフレームの車体のy軸方向の速度
+		/// </summary>
+		public float UpwardVelocity { get; private set; }
+
+		/// <summary>
+		/// このフレームの車体のz軸方向の速度
+		/// </summary>
+		public float ForwardVelocity { get; private set; }
 
 		/// <summary>
 		/// このフレームの車体の角速度
@@ -306,8 +359,9 @@ namespace Speedcar
 		private void UpdateMeasurements()
 		{
 			var localVelocity = Rigidbody.transform.InverseTransformDirection(Rigidbody.velocity);
-			ForwardVelocity = localVelocity.z;
 			SidewayVelocity = localVelocity.x;
+			UpwardVelocity = localVelocity.y;
+			ForwardVelocity = localVelocity.z;
 			AngularVelocity = Rigidbody.angularVelocity;
 		}
 
@@ -327,6 +381,18 @@ namespace Speedcar
 		{
 			var downforce = Mathf.Clamp(Mathf.Pow(ForwardVelocity, 2f) * DownforceCoefficient, 0f, MaxDownforce);
 			Rigidbody.AddRelativeForce(Vector3.down * downforce, ForceMode.Force);
+		}
+
+		/// <summary>
+		/// 空気抵抗を適用する
+		/// </summary>
+		private void AddAerodynamicFriction()
+		{
+			var localSpeed = new Vector3(Mathf.Abs(SidewayVelocity), Mathf.Abs(UpwardVelocity), Mathf.Abs(ForwardVelocity));
+			var linear = Vector3.Scale(LinearDrag, localSpeed);
+			Rigidbody.AddRelativeForce(linear, ForceMode.Force);
+			var quadratic = Vector3.Scale(QuadraticDrag, Vector3.Scale(localSpeed, localSpeed));
+			Rigidbody.AddRelativeForce(quadratic, ForceMode.Force);
 		}
 
 		/// <summary>
