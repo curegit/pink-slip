@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Speedcar
 {
-	[RequireComponent(typeof(Rigidbody)), DisallowMultipleComponent]
+	[RequireComponent(typeof(Body)), DisallowMultipleComponent]
 	public class Suspension : MonoBehaviour
 	{
 
@@ -20,20 +20,22 @@ namespace Speedcar
 		[SerializeField]
 		private WheelCollider rearRightWheelCollider;
 
-		[SerializeField]
-		private float frontNaturalFrequency = 1.2f;
+
+
 
 		[SerializeField]
-		private float rearNaturalFrequency = 1.2f;
+		private float naturalFrequency = 1.5f;
 
 		[SerializeField]
-		private float dampingRatio = 0.7f;
+		private float springRateBias = 0.45f;
 
 		[SerializeField]
-		private float springRateBias = 0.5f;
+		private float dampingRatio = 0.95f;
 
 		[SerializeField]
-		private float forceShift = 0.1f;
+		private float forceShift = 0.15f;
+
+
 
 		[SerializeField]
 		private bool autoConfigureSuspensionDistance;
@@ -44,6 +46,9 @@ namespace Speedcar
 		[SerializeField]
 		private float rearSuspensionDistance = 0.25f;
 
+
+
+
 		[SerializeField]
 		private float maxSteerAngle = 30f;
 
@@ -51,28 +56,41 @@ namespace Speedcar
 		private float ackermannCoefficient = 1f;
 
 		[SerializeField]
-		private float toeAngle = 0.1f;
+		private float frontToeAngle = 0.1f;
 
 		[SerializeField]
-		private float antiOversteerCoefficient;
+		private float rearToeAngle = 0f;
+
+
 
 		[SerializeField]
-		private float frontBrakeTorque;
-
-		[SerializeField]
-		private float rearBrakeTorque;
+		private float brakeTorque;
 
 		[SerializeField]
 		private float brakeBias = 0.5f;
 
 		[SerializeField]
-		private float frontStabilizerCoefficient;
-
-		[SerializeField]
-		private float rearStabilizerCoefficient;
+		private float stabilizerCoefficient;
 
 		[SerializeField]
 		private float stabilizerBias = 0.5f;
+
+
+
+
+		[SerializeField]
+		private FrictionCurveSet frictionCurveSet;
+
+		public float DriftOrGrip;
+
+		public float StiffnessMultiplier { get; set; }
+		public float BrakeBonusStiffness;
+		public float SteerDriftBonusStiffness;
+		public float NoSteerBonusStiffness;
+
+		[SerializeField]
+		private float antiOversteerCoefficient;
+
 
 		[SerializeField]
 		private float substepsSpeedThreshold = 25f;
@@ -82,6 +100,11 @@ namespace Speedcar
 
 		[SerializeField]
 		private int substepsBelowThreshold = 4;
+
+
+
+
+
 
 
 		private float brake;
@@ -168,27 +191,15 @@ namespace Speedcar
 			}
 		}
 
-		public float FrontNaturalFrequency
+		public float NaturalFrequency
 		{
 			get
 			{
-				return frontNaturalFrequency;
+				return naturalFrequency;
 			}
 			set
 			{
-				frontNaturalFrequency = Mathf.Max(value, 0f);
-			}
-		}
-
-		public float RearNaturalFrequency
-		{
-			get
-			{
-				return rearNaturalFrequency;
-			}
-			set
-			{
-				rearNaturalFrequency = Mathf.Max(value, 0f);
+				naturalFrequency = Mathf.Max(value, 0f);
 			}
 		}
 
@@ -293,17 +304,30 @@ namespace Speedcar
 		}
 
 
-		public float ToeAngle
+		public float FrontToeAngle
 		{
 			get
 			{
-				return toeAngle;
+				return frontToeAngle;
 			}
 			set
 			{
-				toeAngle = Mathf.Max(value, 0f);
+				frontToeAngle = Mathf.Max(value, 0f);
 			}
 		}
+
+		public float RearToeAngle
+		{
+			get
+			{
+				return rearToeAngle;
+			}
+			set
+			{
+				rearToeAngle = Mathf.Max(value, 0f);
+			}
+		}
+
 
 		private float AntiOversteerCoefficient
 		{
@@ -317,31 +341,17 @@ namespace Speedcar
 			}
 		}
 
-		public float FrontBrakeTorque
+		public float BrakeTorque
 		{
 			get
 			{
-				return frontBrakeTorque;
+				return brakeTorque;
 			}
 			set
 			{
-				frontBrakeTorque = Mathf.Max(value, 0f);
+				brakeTorque = Mathf.Max(value, 0f);
 			}
 		}
-
-
-		public float RearBrakeTorque
-		{
-			get
-			{
-				return rearBrakeTorque;
-			}
-			set
-			{
-				rearBrakeTorque = Mathf.Max(value, 0f);
-			}
-		}
-
 
 		public float BrakeBias
 		{
@@ -355,29 +365,18 @@ namespace Speedcar
 			}
 		}
 
-		public float FrontStabilizerCoefficient
+		public float StabilizerCoefficient
 		{
 			get
 			{
-				return frontStabilizerCoefficient;
+				return stabilizerCoefficient;
 			}
 			set
 			{
-				frontStabilizerCoefficient = Mathf.Max(value, 0f);
+				stabilizerCoefficient = Mathf.Max(value, 0f);
 			}
 		}
 
-		public float RearStabilizerCoefficient
-		{
-			get
-			{
-				return rearStabilizerCoefficient;
-			}
-			set
-			{
-				rearStabilizerCoefficient = Mathf.Max(value, 0f);
-			}
-		}
 
 		public float StabilizerBias
 		{
@@ -390,6 +389,29 @@ namespace Speedcar
 				stabilizerBias = Mathf.Clamp01(value);
 			}
 		}
+
+
+
+
+		public FrictionCurveSet FrictionCurveSet
+		{
+			get
+			{
+				return frictionCurveSet;
+			}
+			set
+			{
+				frictionCurveSet = value;
+			}
+		}
+
+
+
+
+
+
+
+
 
 
 		public float SubstepsSpeedThreshold
@@ -433,6 +455,11 @@ namespace Speedcar
 			}
 		}
 
+
+
+
+
+	
 
 
 
@@ -526,8 +553,6 @@ namespace Speedcar
 			{
 				Vector3 left = WheelPosition(FrontLeftWheelCollider);
 				Vector3 right = WheelPosition(FrontRightWheelCollider);
-				//Vector3 left = FrontLeftWheelCollider.transform.position + FrontLeftWheelCollider.transform.TransformPoint(FrontLeftWheelCollider.center);
-				//Vector3 right = FrontRightWheelCollider.transform.position + FrontRightWheelCollider.transform.TransformPoint(FrontRightWheelCollider.center);
 				Vector3 diff = Rigidbody.transform.InverseTransformDirection(left - right);
 				return Mathf.Sqrt(diff.x * diff.x + diff.z * diff.z);
 			}
@@ -539,8 +564,6 @@ namespace Speedcar
 			{
 				Vector3 left = WheelPosition(RearLeftWheelCollider);
 				Vector3 right = WheelPosition(RearRightWheelCollider);
-				//Vector3 left = RearLeftWheelCollider.transform.position + RearLeftWheelCollider.transform.TransformPoint(RearLeftWheelCollider.center);
-				//Vector3 right = RearRightWheelCollider.transform.position + RearRightWheelCollider.transform.TransformPoint(RearRightWheelCollider.center);
 				Vector3 diff = Rigidbody.transform.InverseTransformDirection(left - right);
 				return Mathf.Sqrt(diff.x * diff.x + diff.z * diff.z);
 			}
@@ -554,12 +577,6 @@ namespace Speedcar
 				Vector3 frontRight = WheelPosition(FrontRightWheelCollider);
 				Vector3 rearLeft = WheelPosition(RearLeftWheelCollider);
 				Vector3 rearRight = WheelPosition(RearRightWheelCollider);
-				/*
-				Vector3 frontLeft = FrontLeftWheelCollider.transform.position + FrontLeftWheelCollider.transform.TransformPoint(FrontLeftWheelCollider.center);
-				Vector3 frontRight = FrontRightWheelCollider.transform.position + FrontRightWheelCollider.transform.TransformPoint(FrontRightWheelCollider.center);
-				Vector3 rearLeft = RearLeftWheelCollider.transform.position + RearLeftWheelCollider.transform.TransformPoint(RearLeftWheelCollider.center);
-				Vector3 rearRight = RearRightWheelCollider.transform.position + RearRightWheelCollider.transform.TransformPoint(RearRightWheelCollider.center);
-				*/
 				Vector3 leftDiff = Rigidbody.transform.InverseTransformDirection(frontLeft - rearLeft);
 				Vector3 rightDiff = Rigidbody.transform.InverseTransformDirection(frontRight - rearRight);
 				float left = Mathf.Sqrt(leftDiff.y * leftDiff.y + leftDiff.z * leftDiff.z);
@@ -569,11 +586,16 @@ namespace Speedcar
 		}
 
 
+		private Body Body { get; set; }
+
+
+
 		private Rigidbody Rigidbody { get; set; }
 
 		// Use this for initialization
 		private void Start()
 		{
+			Body = GetComponent<Body>();
 			Rigidbody = GetComponent<Rigidbody>();
 		}
 
@@ -587,10 +609,7 @@ namespace Speedcar
 			ConfigureSubsteps();
 
 
-
-			print(FrontTrack);
-			print(RearTrack);
-			print(Wheelbase);
+			print(FrontLeftWheelHit.HasValue ? FrontLeftWheelHit.Value.sidewaysSlip.ToString(): "garbage");
 		}
 
 		private void FixedUpdate()
@@ -599,13 +618,13 @@ namespace Speedcar
 			ApplySteering();
 			ApplyBrakes();
 			Stabilize();
-			PreventOversteer();
+			UpdateFrictionCurve();
 		}
 
 		private void GetGroundHits()
 		{
-			WheelHit hit;
-			FrontLeftWheelHit = FrontLeftWheelCollider.GetGroundHit(out hit) ? hit : default(WheelHit?);
+			//WheelHit hit;
+			FrontLeftWheelHit = FrontLeftWheelCollider.GetGroundHit(out var hit) ? hit : default(WheelHit?);
 			FrontRightWheelHit = FrontRightWheelCollider.GetGroundHit(out hit) ? hit : default(WheelHit?);
 			RearLeftWheelHit = RearLeftWheelCollider.GetGroundHit(out hit) ? hit : default(WheelHit?);
 			RearRightWheelHit = RearRightWheelCollider.GetGroundHit(out hit) ? hit : default(WheelHit?);
@@ -620,25 +639,28 @@ namespace Speedcar
 			float outer = Mathf.Lerp(inner, Ackermann(inner), AckermannCoefficient);
 			if (SteerRate < 0f)
 			{
-				FrontLeftWheelCollider.steerAngle = -inner + ToeAngle;
-				FrontRightWheelCollider.steerAngle = -outer - ToeAngle;
+				FrontLeftWheelCollider.steerAngle = -inner + FrontToeAngle;
+				FrontRightWheelCollider.steerAngle = -outer - FrontToeAngle;
 			}
 			else if (SteerRate > 0f)
 			{
-				FrontLeftWheelCollider.steerAngle = outer + ToeAngle;
-				FrontRightWheelCollider.steerAngle = inner - ToeAngle;
+				FrontLeftWheelCollider.steerAngle = outer + FrontToeAngle;
+				FrontRightWheelCollider.steerAngle = inner - FrontToeAngle;
 			}
 			else
 			{
-				FrontLeftWheelCollider.steerAngle = ToeAngle;
-				FrontRightWheelCollider.steerAngle = -ToeAngle;
+				FrontLeftWheelCollider.steerAngle = FrontToeAngle;
+				FrontRightWheelCollider.steerAngle = -FrontToeAngle;
 			}
+
+			RearLeftWheelCollider.steerAngle = RearToeAngle;
+			RearRightWheelCollider.steerAngle = -RearToeAngle;
 		}
 
 		private void ApplyBrakes()
 		{
-			float frontBrakeTorque = Brake * Mathf.Lerp(FrontBrakeTorque * 2f, 0f, BrakeBias);
-			float rearBrakeTorque = Brake * Mathf.Lerp(0f, RearBrakeTorque * 2f, BrakeBias);
+			float frontBrakeTorque = Brake * Mathf.Lerp(BrakeTorque * 2f, 0f, BrakeBias);
+			float rearBrakeTorque = Brake * Mathf.Lerp(0f, BrakeTorque * 2f, BrakeBias);
 			// TODO ハンドブレーキ
 			float totalFrontBrakeTorque = frontBrakeTorque;
 			float totalRearBrakeTorque = rearBrakeTorque;
@@ -654,48 +676,99 @@ namespace Speedcar
 
 		private void Stabilize()
 		{
-			float travelLeftFront = FrontLeftWheelHit == null ? 1.0f : (-(FrontLeftWheelCollider.transform.InverseTransformPoint(FrontLeftWheelHit.Value.point).y - FrontLeftWheelCollider.center.y) - FrontLeftWheelCollider.radius) / FrontLeftWheelCollider.suspensionDistance;
-			float travelRightFront = FrontRightWheelHit == null ? 1.0f : (-(FrontRightWheelCollider.transform.InverseTransformPoint(FrontRightWheelHit.Value.point).y - FrontRightWheelCollider.center.y) - FrontRightWheelCollider.radius) / FrontRightWheelCollider.suspensionDistance;
-
-
-			float frontCoefficient = Mathf.Lerp(2 * FrontStabilizerCoefficient, 0f, StabilizerBias);
-			float rearCoefficient = Mathf.Lerp(0f, 2f * RearStabilizerCoefficient, StabilizerBias);
-
-			float frontAntiRollForce = (travelLeftFront - travelRightFront) * frontCoefficient;
-
+			float frontLeftTravel = FrontLeftWheelHit == null ? 1.0f : (-(FrontLeftWheelCollider.transform.InverseTransformPoint(FrontLeftWheelHit.Value.point).y - FrontLeftWheelCollider.center.y) - FrontLeftWheelCollider.radius) / FrontLeftWheelCollider.suspensionDistance;
+			float frontRightTravel = FrontRightWheelHit == null ? 1.0f : (-(FrontRightWheelCollider.transform.InverseTransformPoint(FrontRightWheelHit.Value.point).y - FrontRightWheelCollider.center.y) - FrontRightWheelCollider.radius) / FrontRightWheelCollider.suspensionDistance;
+			float rearLeftTravel = RearLeftWheelHit == null ? 1.0f : (-(RearLeftWheelCollider.transform.InverseTransformPoint(RearLeftWheelHit.Value.point).y - RearLeftWheelCollider.center.y) - RearLeftWheelCollider.radius) / RearLeftWheelCollider.suspensionDistance;
+			float rearRightTravel = RearRightWheelHit == null ? 1.0f : (-(RearRightWheelCollider.transform.InverseTransformPoint(RearRightWheelHit.Value.point).y - RearRightWheelCollider.center.y) - RearRightWheelCollider.radius) / RearRightWheelCollider.suspensionDistance;
+			float frontCoefficient = Mathf.Lerp(2 * StabilizerCoefficient, 0f, StabilizerBias);
+			float rearCoefficient = Mathf.Lerp(0f, 2f * StabilizerCoefficient, StabilizerBias);
+			float frontAntiRollForce = (frontLeftTravel - frontRightTravel) * frontCoefficient;
+			float rearAntiRollForce = (rearLeftTravel - rearRightTravel) * rearCoefficient;
 			if (FrontLeftWheelHit != null) Rigidbody.AddForceAtPosition(FrontLeftWheelCollider.transform.up * -frontAntiRollForce, WheelPosition(FrontLeftWheelCollider));
 			if (FrontRightWheelHit != null) Rigidbody.AddForceAtPosition(FrontRightWheelCollider.transform.up * frontAntiRollForce, WheelPosition(FrontRightWheelCollider));
-
-
-
-
+			if (RearLeftWheelHit != null) Rigidbody.AddForceAtPosition(RearLeftWheelCollider.transform.up * -rearAntiRollForce, WheelPosition(RearLeftWheelCollider));
+			if (RearRightWheelHit != null) Rigidbody.AddForceAtPosition(RearRightWheelCollider.transform.up * rearAntiRollForce, WheelPosition(RearRightWheelCollider));
 		}
 
-		private void PreventOversteer()
+
+
+
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		private void UpdateFrictionCurve()
 		{
+
+			float brakeBonus = BrakeBonusStiffness * Brake;
+
+			foreach (var wheelCollider in FrontWheelColliders)
+			{
+				WheelFrictionCurve forward = FrictionCurveSet.FrontForwardFriction;
+				forward.stiffness = forward.stiffness + brakeBonus;
+				wheelCollider.forwardFriction = forward;
+
+
+				WheelFrictionCurve sideway = FrictionCurveSet.FrontSidewayFriction;
+				//sideway.stiffness = sideway.stiffness + Mathf.Abs(SteerRate) * SteerDriftBonusStiffness;
+				//sideway.stiffness = sideway.stiffness + brakeBonus;
+				wheelCollider.sidewaysFriction = sideway;
+			}
+			foreach (var wheelCollider in RearWheelColliders)
+			{
+				WheelFrictionCurve forward = FrictionCurveSet.RearForwardFriction;
+				forward.stiffness = forward.stiffness + brakeBonus;
+				wheelCollider.forwardFriction = forward;
+
+				WheelFrictionCurve sideway = FrictionCurveSet.RearSidewayFriction;
+				//sideway.stiffness = sideway.stiffness + Mathf.Abs(SteerRate) * SteerDriftBonusStiffness;
+				//sideway.stiffness = sideway.stiffness + brakeBonus;
+				wheelCollider.sidewaysFriction = sideway;
+			}
+
+
 			// 要確認
-			Vector3 driveDirection = transform.forward;
-			Vector3 velocityDirection = (Rigidbody.velocity - transform.up * Vector3.Dot(Rigidbody.velocity, transform.up)).normalized;
+			var driveDirection = transform.forward;
+			var velocityDirection = (Rigidbody.velocity - transform.up * Vector3.Dot(Rigidbody.velocity, transform.up)).normalized;
 			float angle = -Mathf.Asin(Vector3.Dot(Vector3.Cross(driveDirection, velocityDirection), transform.up));
 			float angularVelocity = Rigidbody.angularVelocity.y;
 
-
-			/*
-			if (angle * SteerRate < 0)
+			foreach (var wheelCollider in FrontWheelColliders)
 			{
-				var sideway = wheelCollider.sidewaysFriction;
-				// sideway.stiffness = oldStiffness * (1.0f - Mathf.Clamp01(compensationFactor * Mathf.Abs(angularVelocity)));
+				if (angle * SteerRate < 0)
+				{
+					var compensationFactor = 0.1f;
 
-				sideway.stiffness = Mathf.Lerp(oldStiffness, oldStiffness * (1.0f - Mathf.Clamp01(compensationFactor * Mathf.Abs(angularVelocity))), Mathf.Abs(SteerRate));
-				wheelCollider.sidewaysFriction = sideway;
+					var sideway = wheelCollider.sidewaysFriction;
+					sideway.stiffness = sideway.stiffness * (1.0f - Mathf.Clamp01(compensationFactor * Mathf.Abs(angularVelocity)));
+
+					//sideway.stiffness = Mathf.Lerp(Sstiff, newSStiff * (1.0f - Mathf.Clamp01(compensationFactor * Mathf.Abs(angularVelocity))), Mathf.Abs(SteerRate));
+					//wheelCollider.sidewaysFriction = sideway;
+				}
+				//else if (angle * SteerRate > 0)
+				//{
+					//var compensationFactor = 0.1f;
+
+					//var sideway = wheelCollider.sidewaysFriction;
+					//sideway.stiffness = sideway.stiffness * (1.0f + Mathf.Clamp01(compensationFactor * Mathf.Abs(angularVelocity)));
+				//}
+				else
+				{
+
+
+					var sideway = wheelCollider.sidewaysFriction;
+					//sideway.stiffness = oldStiffness;
+					wheelCollider.sidewaysFriction = sideway;
+				}
+
+
+
 			}
-			else
-			{
-				var sideway = wheelCollider.sidewaysFriction;
-				sideway.stiffness = oldStiffness;
-				wheelCollider.sidewaysFriction = sideway;
-			}
-			*/
+			
+
+			
 
 		}
 
@@ -705,10 +778,10 @@ namespace Speedcar
 
 		private void AdjustSprings()
 		{
-			float frontNaturalFrequencySquared = Mathf.Pow(FrontNaturalFrequency, 2f);
-			float rearNaturalFrequencySquared = Mathf.Pow(RearNaturalFrequency, 2f);
-			float biasedFrontNaturalFrequencySquared = Mathf.Lerp(2f * frontNaturalFrequencySquared, 0f, SpringRateBias);
-			float biasedRearNaturalFrequencySquared = Mathf.Lerp(0f, 2f * rearNaturalFrequencySquared, SpringRateBias);
+			float naturalFrequencySquared = Mathf.Pow(NaturalFrequency, 2f);
+			//float rearNaturalFrequencySquared = Mathf.Pow(RearNaturalFrequency, 2f);
+			float biasedFrontNaturalFrequencySquared = Mathf.Lerp(2f * naturalFrequencySquared, 0f, SpringRateBias);
+			float biasedRearNaturalFrequencySquared = Mathf.Lerp(0f, 2f * naturalFrequencySquared, SpringRateBias);
 			foreach (var wheelCollider in FrontWheelColliders)
 			{
 				var suspension = wheelCollider.suspensionSpring;
@@ -755,7 +828,7 @@ namespace Speedcar
 			if (AutoConfigureSuspensionDistance)
 			{
 				// 
-				float gravity = Mathf.Abs(Physics.gravity.y);
+				float gravity = Mathf.Abs(Physics.gravity.y * Body.GravityMultiplier);
 				// 
 				foreach (var wheelCollider in WheelColliders)
 				{
@@ -799,7 +872,7 @@ namespace Speedcar
 			return Mathf.Atan(1 / (axleTrack / Wheelbase + 1 / Mathf.Tan(innerAngle * Mathf.Deg2Rad))) * Mathf.Rad2Deg;
 		}
 
-		private static Vector3 WheelPosition(WheelCollider wheelCollider)
+		private Vector3 WheelPosition(WheelCollider wheelCollider)
 		{
 			return wheelCollider.transform.TransformPoint(wheelCollider.center);
 		}

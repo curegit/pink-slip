@@ -12,6 +12,9 @@ namespace Speedcar
 		[SerializeField]
 		private bool antiLockBrake = true;
 
+
+
+		/*
 		[SerializeField]
 		private bool launchControl = true;
 
@@ -20,6 +23,17 @@ namespace Speedcar
 
 		[SerializeField]
 		private bool tractionControl = true;
+		*/
+
+
+		[SerializeField]
+		private float steerLimit = 0.3f;
+		[SerializeField]
+		private float steerLimitSpeed = 70f;
+		public float SteerLimit => steerLimit;
+		public float SteerLimitSpeed => steerLimitSpeed;
+
+
 
 		private float gas;
 
@@ -46,6 +60,7 @@ namespace Speedcar
 			}
 		}
 
+		/*
 		/// <summary>
 		/// 
 		/// </summary>
@@ -90,6 +105,7 @@ namespace Speedcar
 				tractionControl = value;
 			}
 		}
+		*/
 
 		/// <summary>
 		/// 
@@ -158,17 +174,36 @@ namespace Speedcar
 
 		public float AdjustedBrake { get; private set; }
 
+
+		public float AdjustedSteerRate { get; private set; }
+
+
+		private Body Body { get; set; }
+
 		private Powertrain Powertrain { get; set; }
 
 		private Suspension Suspension { get; set; }
 
 		private Rigidbody Rigidbody { get; set; }
 
+
+
+		public void ShiftUp()
+		{
+
+		}
+
+		public void ShiftDown()
+		{
+
+		}
+
 		/// <summary>
 		/// 
 		/// </summary>
 		private void Start()
 		{
+			Body = GetComponent<Body>();
 			Powertrain = GetComponent<Powertrain>();
 			Suspension = GetComponent<Suspension>();
 			Rigidbody = GetComponent<Rigidbody>();
@@ -183,6 +218,12 @@ namespace Speedcar
 			AdjustGas();
 			//
 			AdjustBrake();
+
+
+			AdjustedSteerRate = Mathf.Lerp(SteerRate, SteerRate * SteerLimit, Mathf.InverseLerp(0f, SteerLimitSpeed, Mathf.Abs(Body.ForwardVelocity)));
+
+
+
 			// 
 			Powertrain.Throttle = AdjustedGas;
 
@@ -192,7 +233,7 @@ namespace Speedcar
 
 			Suspension.HandBrake = HandBrake;
 
-			Suspension.SteerRate = SteerRate;
+			Suspension.SteerRate = AdjustedSteerRate;
 		}
 
 		/// <summary>
@@ -200,6 +241,8 @@ namespace Speedcar
 		/// </summary>
 		private void AdjustGas()
 		{
+			AdjustedGas = Gas;
+			/*
 			const float eps = 0.1f;
 			float speed = Rigidbody.transform.InverseTransformDirection(Rigidbody.velocity).z;
 
@@ -226,6 +269,7 @@ namespace Speedcar
 			{
 				AdjustedGas = Gas;
 			}
+			*/
 		}
 
 		/// <summary>
