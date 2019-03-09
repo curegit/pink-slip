@@ -9,6 +9,12 @@ namespace Speedcar
 	public class Body : MonoBehaviour
 	{
 		/// <summary>
+		/// 重心を表すトランスフォームのバッキングフィールド
+		/// </summary>
+		[SerializeField]
+		private Transform centerOfMass;
+
+		/// <summary>
 		/// 主慣性モーメントのバッキングフィールド
 		/// </summary>
 		[SerializeField]
@@ -21,16 +27,22 @@ namespace Speedcar
 		private Vector3 inertiaTensorRotation = new Vector3(0.1f, 0f, 0f);
 
 		/// <summary>
-		/// 重心を表すトランスフォームのバッキングフィールド
-		/// </summary>
-		[SerializeField]
-		private Transform centerOfMass;
-
-		/// <summary>
 		/// 重力を追加適用する係数のバッキングフィールド
 		/// </summary>
 		[SerializeField]
 		private float gravityMultiplier = 1.2f;
+
+		/// <summary>
+		/// 速度に比例する空気抵抗の係数のバッキングフィールド
+		/// </summary>
+		[SerializeField]
+		private Vector3 linearDrag = new Vector3(1.0f, 2.0f, 0.25f);
+
+		/// <summary>
+		/// 速度の二乗に比例する空気抵抗の係数のバッキングフィールド
+		/// </summary>
+		[SerializeField]
+		private Vector3 quadraticDrag = new Vector3(3.0f, 4.0f, 0.5f);
 
 		/// <summary>
 		/// ダウンフォースの比例係数のバッキングフィールド
@@ -43,18 +55,6 @@ namespace Speedcar
 		/// </summary>
 		[SerializeField]
 		private float maxDownforce = 12000f;
-
-		/// <summary>
-		/// 速度に比例する空気抵抗の係数
-		/// </summary>
-		[SerializeField]
-		private Vector3 linearDrag = new Vector3(1.0f, 2.0f, 0.25f);
-
-		/// <summary>
-		/// 速度の二乗に比例する空気抵抗の係数
-		/// </summary>
-		[SerializeField]
-		private Vector3 quadraticDrag = new Vector3(3.0f, 4.0f, 0.5f);
 
 		/// <summary>
 		/// 角速度の大きさの上限のバッキングフィールド
@@ -85,6 +85,21 @@ namespace Speedcar
 		/// </summary>
 		[SerializeField]
 		private int solverVelocityIterations = 8;
+
+		/// <summary>
+		/// 重心を表すトランスフォーム
+		/// </summary>
+		public Transform CenterOfMass
+		{
+			get
+			{
+				return centerOfMass;
+			}
+			set
+			{
+				centerOfMass = value;
+			}
+		}
 
 		/// <summary>
 		/// 主慣性モーメント
@@ -123,21 +138,6 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 重心を表すトランスフォーム
-		/// </summary>
-		public Transform CenterOfMass
-		{
-			get
-			{
-				return centerOfMass;
-			}
-			set
-			{
-				centerOfMass = value;
-			}
-		}
-
-		/// <summary>
 		/// 重力を追加適用する係数
 		/// </summary>
 		public float GravityMultiplier
@@ -149,36 +149,6 @@ namespace Speedcar
 			set
 			{
 				gravityMultiplier = Mathf.Max(value, 0f);
-			}
-		}
-
-		/// <summary>
-		/// ダウンフォースの比例係数
-		/// </summary>
-		public float DownforceCoefficient
-		{
-			get
-			{
-				return downforceCoefficient;
-			}
-			set
-			{
-				downforceCoefficient = Mathf.Max(value, 0f);
-			}
-		}
-
-		/// <summary>
-		/// ダウンフォースの上限
-		/// </summary>
-		public float MaxDownforce
-		{
-			get
-			{
-				return maxDownforce;
-			}
-			set
-			{
-				maxDownforce = Mathf.Max(value, 0f);
 			}
 		}
 
@@ -215,6 +185,36 @@ namespace Speedcar
 				value.y = Mathf.Max(value.y, 0f);
 				value.z = Mathf.Max(value.z, 0f);
 				quadraticDrag = value;
+			}
+		}
+
+		/// <summary>
+		/// ダウンフォースの比例係数
+		/// </summary>
+		public float DownforceCoefficient
+		{
+			get
+			{
+				return downforceCoefficient;
+			}
+			set
+			{
+				downforceCoefficient = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// ダウンフォースの上限
+		/// </summary>
+		public float MaxDownforce
+		{
+			get
+			{
+				return maxDownforce;
+			}
+			set
+			{
+				maxDownforce = Mathf.Max(value, 0f);
 			}
 		}
 
@@ -375,15 +375,6 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// ダウンフォースを適用する
-		/// </summary>
-		private void AddDownforce()
-		{
-			var downforce = Mathf.Clamp(Mathf.Pow(ForwardVelocity, 2f) * DownforceCoefficient, 0f, MaxDownforce);
-			Rigidbody.AddRelativeForce(Vector3.down * downforce, ForceMode.Force);
-		}
-
-		/// <summary>
 		/// 空気抵抗を適用する
 		/// </summary>
 		private void AddAerodynamicFriction()
@@ -393,6 +384,15 @@ namespace Speedcar
 			Rigidbody.AddRelativeForce(linear, ForceMode.Force);
 			var quadratic = Vector3.Scale(QuadraticDrag, Vector3.Scale(localSpeed, localSpeed));
 			Rigidbody.AddRelativeForce(quadratic, ForceMode.Force);
+		}
+
+		/// <summary>
+		/// ダウンフォースを適用する
+		/// </summary>
+		private void AddDownforce()
+		{
+			var downforce = Mathf.Clamp(Mathf.Pow(ForwardVelocity, 2f) * DownforceCoefficient, 0f, MaxDownforce);
+			Rigidbody.AddRelativeForce(Vector3.down * downforce, ForceMode.Force);
 		}
 
 		/// <summary>
