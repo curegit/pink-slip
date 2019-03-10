@@ -351,7 +351,8 @@ namespace Speedcar
 		/// <param name="collision">衝突相手</param>
 		private void OnCollisionEnter(Collision collision)
 		{
-			Rigidbody.angularVelocity = Vector3.MoveTowards(AngularVelocity, Rigidbody.angularVelocity, MaxAngularVelocityDeltaOnCollision);
+			var newAngularVelocity = Vector3.MoveTowards(AngularVelocity, Rigidbody.angularVelocity, MaxAngularVelocityDeltaOnCollision);
+			Rigidbody.AddTorque(newAngularVelocity - AngularVelocity, ForceMode.VelocityChange);
 		}
 
 		/// <summary>
