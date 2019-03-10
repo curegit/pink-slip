@@ -341,6 +341,7 @@ namespace Speedcar
 		{
 			UpdateMeasurements();
 			AddExtraGravity();
+			AddAerodynamicFriction();
 			AddDownforce();
 		}
 
