@@ -360,10 +360,9 @@ namespace Speedcar
 		/// </summary>
 		private void UpdateMeasurements()
 		{
-			var localVelocity = Rigidbody.transform.InverseTransformDirection(Rigidbody.velocity);
-			SidewayVelocity = localVelocity.x;
-			UpwardVelocity = localVelocity.y;
-			ForwardVelocity = localVelocity.z;
+			SidewayVelocity = Vector3.Dot(Rigidbody.velocity, Rigidbody.rotation * Vector3.right);
+			UpwardVelocity = Vector3.Dot(Rigidbody.velocity, Rigidbody.rotation * Vector3.up);
+			ForwardVelocity = Vector3.Dot(Rigidbody.velocity, Rigidbody.rotation * Vector3.forward);
 			AngularVelocity = Rigidbody.angularVelocity;
 		}
 
