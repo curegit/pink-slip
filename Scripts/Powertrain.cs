@@ -772,7 +772,7 @@ namespace Speedcar
 			else
 			{
 				// 角加速度から回転数を更新
-				float rpm = RPM + Torque / EngineInertia * Time.fixedDeltaTime / (2f * Mathf.PI);
+				float rpm = RPM + Torque / EngineInertia * Time.fixedDeltaTime * 60f / (2f * Mathf.PI);
 				// エンジンブレーキを適用
 				rpm = rpm * (1f - Time.fixedDeltaTime * Mathf.InverseLerp(MaxPlainPressure, MinPressure, Pressure) * Mathf.InverseLerp(0f, MaxRPM, RPM) * EngineBrakingCoefficient);
 				// 有効な範囲に丸めて更新
