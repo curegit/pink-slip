@@ -685,7 +685,7 @@ namespace Speedcar
 		/// </summary>
 		private void UpdateClutch()
 		{
-			Clutch = Mathf.MoveTowards(Clutch, 0f, 1f / ClutchTime * Time.fixedDeltaTime);
+			Clutch = Mathf.MoveTowards(Clutch, 0f, Time.fixedDeltaTime / ClutchTime);
 		}
 
 		/// <summary>
