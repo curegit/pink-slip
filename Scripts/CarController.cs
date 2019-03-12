@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 namespace Speedcar
 {
@@ -410,10 +411,21 @@ namespace Speedcar
 			// TCSが有効な場合はスリップを抑えるようにをアクセルを調節する
 			if (UseTractionControl)
 			{
+				// 駆動輪の接地情報を取得
+				var poweredWheelHits = Suspension.WheelHits;
+				if (Powertrain.Drivetrain == Drivetrain.FWD) poweredWheelHits = Suspension.FrontWheelHits;
+				if (Powertrain.Drivetrain == Drivetrain.RWD) poweredWheelHits = Suspension.RearWheelHits;
 				// 加速による駆動輪のスリップを求める
-				float accelerationSlip = Mathf.Max(Suspension.ForwardSlip, 0f);
+				var hits = poweredWheelHits.Where(h => h.HasValue);
+				float forwardSlip = hits.Any() ? hits.Average(h => h.Value.forwardSlip) : 0f;
+				float accelerationSlip = Mathf.Max(forwardSlip, 0f);
+				// 駆動輪を取得
+				var poweredWheels = Suspension.WheelColliders;
+				if (Powertrain.Drivetrain == Drivetrain.FWD) poweredWheels = Suspension.FrontWheelColliders;
+				if (Powertrain.Drivetrain == Drivetrain.RWD) poweredWheels = Suspension.RearWheelColliders;
 				// 目標スリップを求める
-				float targetSlip = Suspension.ForwardExtremumSlip * (1f - TractionControlSlipMargin);
+				float forwardExtremumSlip = poweredWheels.Average(w => w.forwardFriction.extremumSlip);
+				float targetSlip = forwardExtremumSlip * (1f - TractionControlSlipMargin);
 				// TCSを適用した場合の補正値を求める
 				float tcsGas = AdjustedGas * (1f - TractionControlEpsilon);
 				// スリップが目標より多い場合
@@ -461,9 +473,11 @@ namespace Speedcar
 			if (UseAntiLockBrake)
 			{
 				// ブレーキングによるスリップを求める
-				float brakingSlip = -Mathf.Min(Suspension.ForwardSlip, 0f);
+				var hits = Suspension.WheelHits.Where(h => h.HasValue);
+				float brakingSlip = -Mathf.Min(hits.Any() ? hits.Average(h => h.Value.forwardSlip) : 0f, 0f);
 				// 目標スリップを求める
-				float targetSlip = Suspension.ForwardExtremumSlip * (1f - AntiLockBrakeSlipMargin);
+				float forwardExtremumSlip = Suspension.WheelColliders.Average(w => w.forwardFriction.extremumSlip);
+				float targetSlip = forwardExtremumSlip * (1f - AntiLockBrakeSlipMargin);
 				// ABSを適用した場合の補正値を求める
 				float absBrake = AdjustedBrake * (1f - AntiLockBrakeEpsilon);
 				// スリップが目標より多い場合

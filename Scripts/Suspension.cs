@@ -485,20 +485,21 @@ namespace Speedcar
 			}
 		}
 
-		public float ForwardSlip
+		public IEnumerable<WheelHit?> FrontWheelHits
 		{
 			get
 			{
-				var hits = WheelHits.Where(x => x != null);
-				return hits.Any() ? hits.Average(h => h.Value.forwardSlip) : 0f;
+				yield return FrontLeftWheelHit;
+				yield return FrontRightWheelHit;
 			}
 		}
 
-		public float ForwardExtremumSlip
+		public IEnumerable<WheelHit?> RearWheelHits
 		{
 			get
 			{
-				return WheelColliders.Average(w => w.forwardFriction.extremumSlip);
+				yield return RearLeftWheelHit;
+				yield return RearRightWheelHit;
 			}
 		}
 
