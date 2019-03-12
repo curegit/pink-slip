@@ -12,7 +12,14 @@ namespace Speedcar
 		[SerializeField]
 		private bool antiLockBrake = true;
 
+		[SerializeField]
+		private float antiLockBrakeDelta = 0.2f;
 
+		[SerializeField]
+		private float antiLockBrakeSlipMargin = 0.3f;
+
+		[SerializeField]
+		private float maxBrakeDelta = 0.6f;
 
 		/*
 		[SerializeField]
@@ -20,10 +27,10 @@ namespace Speedcar
 
 		[SerializeField]
 		private float launchSpeedThreshold= 10f;
-
+		*/
 		[SerializeField]
 		private bool tractionControl = true;
-		*/
+		
 
 
 		[SerializeField]
@@ -60,6 +67,52 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		public float AntiLockBrakeDelta
+		{
+			get
+			{
+				return antiLockBrakeDelta;
+			}
+			set
+			{
+				antiLockBrakeDelta = Mathf.Clamp01(value);
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public float AntiLockBrakeSlipMargin
+		{
+			get
+			{
+				return antiLockBrakeSlipMargin;
+			}
+			set
+			{
+				antiLockBrakeSlipMargin = Mathf.Clamp01(value);
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public float MaxBrakeDelta
+		{
+			get
+			{
+				return maxBrakeDelta;
+			}
+			set
+			{
+				maxBrakeDelta = Mathf.Clamp01(value);
+			}
+		}
+
+
 		/*
 		/// <summary>
 		/// 
@@ -90,6 +143,7 @@ namespace Speedcar
 				launchSpeedThreshold = Mathf.Max(value, 0f);
 			}
 		}
+		*/
 
 		/// <summary>
 		/// 
@@ -105,7 +159,7 @@ namespace Speedcar
 				tractionControl = value;
 			}
 		}
-		*/
+		
 
 		/// <summary>
 		/// 
@@ -234,6 +288,9 @@ namespace Speedcar
 			Suspension.HandBrake = HandBrake;
 
 			Suspension.SteerRate = AdjustedSteerRate;
+
+
+			
 		}
 
 		/// <summary>
@@ -241,26 +298,21 @@ namespace Speedcar
 		/// </summary>
 		private void AdjustGas()
 		{
-			AdjustedGas = Gas;
-			/*
-			const float eps = 0.1f;
-			float speed = Rigidbody.transform.InverseTransformDirection(Rigidbody.velocity).z;
 
 
-			// 駆動輪のみ？
-			float accelerationSlip = Mathf.Max(-Suspension.ForwardSlip, 0f);
-
-			// 
-			if (LaunchControl && speed < LauchSpeedThreshold)
+			if (TractionControl)
 			{
-
-
 				AdjustedGas = Gas;
-			}
-			// 
-			else if (TractionControl)
-			{
 
+				const float eps = 0.2f;
+				//float speed = Rigidbody.transform.InverseTransformDirection(Rigidbody.velocity).z;
+
+
+				// 駆動輪のみ？
+				float accelerationSlip = Mathf.Max(Suspension.ForwardSlip, 0f);
+
+				//
+				float extremumSlip = Suspension.ForwardExtremumSlip / Mathf.Sqrt(2f);
 
 				AdjustedGas = Gas;
 			}
@@ -269,7 +321,7 @@ namespace Speedcar
 			{
 				AdjustedGas = Gas;
 			}
-			*/
+			
 		}
 
 		/// <summary>
@@ -277,18 +329,18 @@ namespace Speedcar
 		/// </summary>
 		private void AdjustBrake()
 		{
-			// ABSがついている場合はスリップを摩擦係数極大点に合わせる制御を行う
+			// ABSがついている場合はスリップをタイヤ摩擦の線形領域に収める制御を行う
 			if (AntiLockBrake)
 			{
-				const float eps = 0.1f;
-				const float maxBrakeDelta = 0.25f;
+				//const float eps = 0.3f;
+				//const float maxBrakeDelta = 1f;
 
 				//
-				float brakingSlip = Mathf.Max(Suspension.ForwardSlip, 0f);
+				float brakingSlip = -Mathf.Min(Suspension.ForwardSlip, 0f);
 				//
-				float extremumSlip = Suspension.ForwardExtremumSlip;
+				float extremumSlip = Suspension.ForwardExtremumSlip * (1f - AntiLockBrakeSlipMargin);
 				//
-				float absBrake = AdjustedBrake * (1f - eps);
+				float absBrake = AdjustedBrake * (1f - AntiLockBrakeDelta);
 				//
 				if (brakingSlip > extremumSlip)
 				{
@@ -300,6 +352,7 @@ namespace Speedcar
 					//
 					else
 					{
+						Debug.Log("ABS");
 						AdjustedBrake = absBrake;
 					}
 				}
@@ -314,7 +367,7 @@ namespace Speedcar
 					//
 					else
 					{
-						AdjustedBrake = Mathf.MoveTowards(AdjustedBrake, Brake, maxBrakeDelta);
+						AdjustedBrake = Mathf.MoveTowards(AdjustedBrake, Brake, MaxBrakeDelta);
 					}
 				}
 			}
