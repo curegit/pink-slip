@@ -3,33 +3,56 @@
 namespace Speedcar
 {
 	/// <summary>
-	/// 
+	/// 車両の入力インターフェイス
 	/// </summary>
 	[RequireComponent(typeof(Powertrain), typeof(Suspension), typeof(Body)), DisallowMultipleComponent]
 	public class CarController : MonoBehaviour
 	{
-
+		/// <summary>
+		/// ABSを有効にするかどうかのバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private bool antiLockBrake = true;
 
+		/// <summary>
+		/// ABSのよるブレーキの戻し率のバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private float antiLockBrakeDelta = 0.2f;
 
+		/// <summary>
+		/// 摩擦極大点のスリップに対してABSが目標とするスリップの割合のバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private float antiLockBrakeSlipMargin = 0.3f;
 
+		/// <summary>
+		/// ABS使用時のブレーキ踏み戻しの割合制限のバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private float maxBrakeDelta = 0.6f;
 
+		/// <summary>
+		/// TCSを有効にするかどうかのバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private bool tractionControl = true;
 
+		/// <summary>
+		/// TCSのよるアクセルの戻し率のバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private float tractionControlDelta = 0.1f;
 
+		/// <summary>
+		/// 摩擦極大点のスリップに対してTCSが目標とするスリップの割合のバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private float tractionControlSlipMargin = 0.1f;
 
+		/// <summary>
+		/// TCS使用時のアクセル踏み戻しの割合制限のバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private float maxGasDelta = 0.2f;
 
@@ -55,7 +78,7 @@ namespace Speedcar
 		private float steerRate;
 
 		/// <summary>
-		/// 
+		/// ABSを有効にするかどうか
 		/// </summary>
 		public bool AntiLockBrake
 		{
@@ -70,7 +93,7 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 
+		/// ABSのよるブレーキの戻し率
 		/// </summary>
 		public float AntiLockBrakeDelta
 		{
@@ -85,7 +108,7 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 
+		/// 摩擦極大点のスリップに対してABSが目標とするスリップの割合
 		/// </summary>
 		public float AntiLockBrakeSlipMargin
 		{
@@ -100,7 +123,7 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 
+		/// ABS使用時のブレーキ踏み戻しの割合制限
 		/// </summary>
 		public float MaxBrakeDelta
 		{
@@ -114,41 +137,8 @@ namespace Speedcar
 			}
 		}
 
-
-		/*
 		/// <summary>
-		/// 
-		/// </summary>
-		public bool LaunchControl
-		{
-			get
-			{
-				return launchControl;
-			}
-			set
-			{
-				launchControl = value;
-			}
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public float LauchSpeedThreshold
-		{
-			get
-			{
-				return launchSpeedThreshold;
-			}
-			set
-			{
-				launchSpeedThreshold = Mathf.Max(value, 0f);
-			}
-		}
-		*/
-
-		/// <summary>
-		/// 
+		/// TCSを有効にするかどうか
 		/// </summary>
 		public bool TractionControl
 		{
@@ -163,7 +153,7 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 
+		/// TCSのよるアクセルの戻し率
 		/// </summary>
 		public float TractionControlDelta
 		{
@@ -178,7 +168,7 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 
+		/// 摩擦極大点のスリップに対してTCSが目標とするスリップの割合
 		/// </summary>
 		public float TractionControlSlipMargin
 		{
@@ -193,7 +183,7 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 
+		/// TCS使用時のアクセル踏み戻しの割合制限
 		/// </summary>
 		public float MaxGasDelta
 		{
