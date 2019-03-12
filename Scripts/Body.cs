@@ -402,9 +402,9 @@ namespace Speedcar
 		private void AddAerodynamicFriction()
 		{
 			var localSpeed = new Vector3(Mathf.Abs(SidewayVelocity), Mathf.Abs(UpwardVelocity), Mathf.Abs(ForwardVelocity));
-			var linear = Vector3.Scale(LinearDrag, localSpeed);
+			var linear = -Vector3.Scale(LinearDrag, localSpeed);
 			Rigidbody.AddRelativeForce(linear, ForceMode.Force);
-			var quadratic = Vector3.Scale(QuadraticDrag, Vector3.Scale(localSpeed, localSpeed));
+			var quadratic = -Vector3.Scale(QuadraticDrag, Vector3.Scale(localSpeed, localSpeed));
 			Rigidbody.AddRelativeForce(quadratic, ForceMode.Force);
 		}
 
