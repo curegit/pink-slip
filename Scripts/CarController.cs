@@ -56,14 +56,27 @@ namespace Speedcar
 		[SerializeField]
 		private float tractionControlMaxGasDelta = 0.3f;
 
+		/// <summary>
+		/// 
+		/// </summary>
+		[SerializeField]
+		private bool useSteerLimit = true;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		[SerializeField]
+		private float minSteerLimit = 0.2f;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		[SerializeField]
+		private float minSteerLimitSpeed = 90f;
 
 
-		[SerializeField]
-		private float steerLimit = 0.3f;
-		[SerializeField]
-		private float steerLimitSpeed = 70f;
-		public float SteerLimit => steerLimit;
-		public float SteerLimitSpeed => steerLimitSpeed;
+
+
 
 
 
@@ -197,7 +210,50 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		public bool UseSteerLimit
+		{
+			get
+			{
+				return useSteerLimit;
+			}
+			set
+			{
+				useSteerLimit = value;
+			}
+		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		public float MinSteerLimit
+		{
+			get
+			{
+				return minSteerLimit;
+			}
+			set
+			{
+				minSteerLimit = Mathf.Clamp01(value);
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public float MinSteerLimitSpeed
+		{
+			get
+			{
+				return minSteerLimitSpeed;
+			}
+			set
+			{
+				minSteerLimitSpeed = Mathf.Max(value, 0f);
+			}
+		}
 
 		/// <summary>
 		/// 
@@ -311,9 +367,7 @@ namespace Speedcar
 			//
 			AdjustBrake();
 
-
-			AdjustedSteerRate = Mathf.Lerp(SteerRate, SteerRate * SteerLimit, Mathf.InverseLerp(0f, SteerLimitSpeed, Mathf.Abs(Body.ForwardVelocity)));
-
+			AdjustSteerRate();
 
 
 			// 
@@ -437,6 +491,21 @@ namespace Speedcar
 			else
 			{
 				AdjustedBrake = Brake;
+			}
+		}
+
+		/// <summary>
+		/// ステアリング角度を調節する
+		/// </summary>
+		public void AdjustSteerRate()
+		{
+			if (UseSteerLimit)
+			{
+				AdjustedSteerRate = Mathf.Lerp(SteerRate, SteerRate * MinSteerLimit, Mathf.InverseLerp(0f, MinSteerLimitSpeed, Mathf.Abs(Body.ForwardVelocity)));
+			}
+			else
+			{
+				AdjustedSteerRate = SteerRate;
 			}
 		}
 	}
