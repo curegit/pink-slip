@@ -12,13 +12,13 @@ namespace Speedcar
 		/// ABSを有効にするかどうかのバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private bool antiLockBrake = true;
+		private bool useAntiLockBrake = true;
 
 		/// <summary>
 		/// ABSのよるブレーキの戻し率のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float antiLockBrakeDelta = 0.2f;
+		private float antiLockBrakeEpsilon = 0.2f;
 
 		/// <summary>
 		/// 摩擦極大点のスリップに対してABSが目標とするスリップの割合のバッキングフィールド
@@ -30,31 +30,31 @@ namespace Speedcar
 		/// ABS使用時のブレーキ踏み戻しの割合制限のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float maxBrakeDelta = 0.6f;
+		private float antiLockBrakeMaxStepDelta = 0.6f;
 
 		/// <summary>
 		/// TCSを有効にするかどうかのバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private bool tractionControl = true;
+		private bool useTractionControl = true;
 
 		/// <summary>
 		/// TCSのよるアクセルの戻し率のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float tractionControlDelta = 0.1f;
+		private float tractionControlEpsilon = 0.1f;
 
 		/// <summary>
 		/// 摩擦極大点のスリップに対してTCSが目標とするスリップの割合のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float tractionControlSlipMargin = 0.1f;
+		private float tractionControlSlipMargin = 0.2f;
 
 		/// <summary>
 		/// TCS使用時のアクセル踏み戻しの割合制限のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float maxGasDelta = 0.2f;
+		private float tractionControlMaxGasDelta = 0.3f;
 
 
 
@@ -80,30 +80,30 @@ namespace Speedcar
 		/// <summary>
 		/// ABSを有効にするかどうか
 		/// </summary>
-		public bool AntiLockBrake
+		public bool UseAntiLockBrake
 		{
 			get
 			{
-				return antiLockBrake;
+				return useAntiLockBrake;
 			}
 			set
 			{
-				antiLockBrake = value;
+				useAntiLockBrake = value;
 			}
 		}
 
 		/// <summary>
 		/// ABSのよるブレーキの戻し率
 		/// </summary>
-		public float AntiLockBrakeDelta
+		public float AntiLockBrakeEpsilon
 		{
 			get
 			{
-				return antiLockBrakeDelta;
+				return antiLockBrakeEpsilon;
 			}
 			set
 			{
-				antiLockBrakeDelta = Mathf.Clamp01(value);
+				antiLockBrakeEpsilon = Mathf.Clamp01(value);
 			}
 		}
 
@@ -125,45 +125,45 @@ namespace Speedcar
 		/// <summary>
 		/// ABS使用時のブレーキ踏み戻しの割合制限
 		/// </summary>
-		public float MaxBrakeDelta
+		public float AntiLockBrakeMaxStepDelta
 		{
 			get
 			{
-				return maxBrakeDelta;
+				return antiLockBrakeMaxStepDelta;
 			}
 			set
 			{
-				maxBrakeDelta = Mathf.Clamp01(value);
+				antiLockBrakeMaxStepDelta = Mathf.Clamp01(value);
 			}
 		}
 
 		/// <summary>
 		/// TCSを有効にするかどうか
 		/// </summary>
-		public bool TractionControl
+		public bool UseTractionControl
 		{
 			get
 			{
-				return tractionControl;
+				return useTractionControl;
 			}
 			set
 			{
-				tractionControl = value;
+				useTractionControl = value;
 			}
 		}
 
 		/// <summary>
 		/// TCSのよるアクセルの戻し率
 		/// </summary>
-		public float TractionControlDelta
+		public float TractionControlEpsilon
 		{
 			get
 			{
-				return tractionControlDelta;
+				return tractionControlEpsilon;
 			}
 			set
 			{
-				tractionControlDelta = Mathf.Clamp01(value);
+				tractionControlEpsilon = Mathf.Clamp01(value);
 			}
 		}
 
@@ -185,15 +185,15 @@ namespace Speedcar
 		/// <summary>
 		/// TCS使用時のアクセル踏み戻しの割合制限
 		/// </summary>
-		public float MaxGasDelta
+		public float TractionControlMaxGasDelta
 		{
 			get
 			{
-				return maxBrakeDelta;
+				return tractionControlMaxGasDelta;
 			}
 			set
 			{
-				maxBrakeDelta = Mathf.Clamp01(value);
+				tractionControlMaxGasDelta = Mathf.Clamp01(value);
 			}
 		}
 
@@ -337,7 +337,7 @@ namespace Speedcar
 		private void AdjustGas()
 		{
 
-			if (TractionControl)
+			if (UseTractionControl)
 			{
 
 
@@ -347,7 +347,7 @@ namespace Speedcar
 				//
 				float extremumSlip = Suspension.ForwardExtremumSlip * (1f - TractionControlSlipMargin);
 
-				float tcsGas = AdjustedGas * (1f - TractionControlDelta);
+				float tcsGas = AdjustedGas * (1f - TractionControlEpsilon);
 
 				if (accelerationSlip > extremumSlip)
 				{
@@ -374,7 +374,7 @@ namespace Speedcar
 					//
 					else
 					{
-						AdjustedGas = Mathf.MoveTowards(AdjustedGas, Gas, MaxGasDelta);
+						AdjustedGas = Mathf.MoveTowards(AdjustedGas, Gas, TractionControlMaxGasDelta);
 					}
 				}
 			}
@@ -392,7 +392,7 @@ namespace Speedcar
 		private void AdjustBrake()
 		{
 			// ABSがついている場合はスリップをタイヤ摩擦の線形領域に収める制御を行う
-			if (AntiLockBrake)
+			if (UseAntiLockBrake)
 			{
 				//const float eps = 0.3f;
 				//const float maxBrakeDelta = 1f;
@@ -402,7 +402,7 @@ namespace Speedcar
 				//
 				float extremumSlip = Suspension.ForwardExtremumSlip * (1f - AntiLockBrakeSlipMargin);
 				//
-				float absBrake = AdjustedBrake * (1f - AntiLockBrakeDelta);
+				float absBrake = AdjustedBrake * (1f - AntiLockBrakeEpsilon);
 				//
 				if (brakingSlip > extremumSlip)
 				{
@@ -429,7 +429,7 @@ namespace Speedcar
 					//
 					else
 					{
-						AdjustedBrake = Mathf.MoveTowards(AdjustedBrake, Brake, MaxBrakeDelta);
+						AdjustedBrake = Mathf.MoveTowards(AdjustedBrake, Brake, AntiLockBrakeMaxStepDelta);
 					}
 				}
 			}
