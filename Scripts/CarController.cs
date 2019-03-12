@@ -24,7 +24,7 @@ namespace Speedcar
 		/// 摩擦極大点のスリップに対してABSが目標とするスリップの割合のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float antiLockBrakeSlipMargin = 0.3f;
+		private float antiLockBrakeSlipMargin = 0.5f;
 
 		/// <summary>
 		/// ABS使用時のブレーキ踏み戻しの割合制限のバッキングフィールド
