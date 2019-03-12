@@ -48,7 +48,7 @@ namespace Speedcar
 		/// 摩擦極大点のスリップに対してTCSが目標とするスリップの割合のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float tractionControlSlipMargin = 0.2f;
+		private float tractionControlSlipMargin = 0.3f;
 
 		/// <summary>
 		/// TCS使用時のアクセル踏み戻しの割合制限のバッキングフィールド
