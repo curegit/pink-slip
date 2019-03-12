@@ -54,41 +54,49 @@ namespace Speedcar
 		/// TCS使用時のアクセル踏み戻しの割合制限のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float tractionControlMaxGasDelta = 0.3f;
 		private float tractionControlMaxGasDelta = 0.4f;
 
 		/// <summary>
-		/// 
+		/// ステアリング範囲を速さによって制限するかどうかのバッキングフィールド
 		/// </summary>
 		[SerializeField]
 		private bool limitSteerRate = true;
 
 		/// <summary>
-		/// 
+		/// 最大制限時のステアリング範囲の割合のバッキングフィールド
 		/// </summary>
 		[SerializeField]
 		private float limitedMaxSteerRate = 0.2f;
 
 		/// <summary>
-		/// 
+		/// ステアリング範囲の制限が最大になる速さのバッキングフィールド
 		/// </summary>
 		[SerializeField]
 		private float limitedSteerRateSpeed = 90f;
 
-
-
-
-
-
-
+		/// <summary>
+		/// 生のアクセル入力のバッキングフィールド
+		/// </summary>
 		private float gas;
 
+		/// <summary>
+		/// 生のブレーキ入力のバッキングフィールド
+		/// </summary>
 		private float brake;
 
+		/// <summary>
+		/// ハンドブレーキ入力のバッキングフィールド
+		/// </summary>
 		private float handBrake;
 
+		/// <summary>
+		/// ギアの入力のバッキングフィールド
+		/// </summary>
 		private int gear;
 
+		/// <summary>
+		/// 生のステアリング割合の入力のバッキングフィールド
+		/// </summary>
 		private float steerRate;
 
 		/// <summary>
@@ -212,7 +220,7 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 
+		/// ステアリング範囲を速度によって制限するかどうか
 		/// </summary>
 		public bool LimitSteerRate
 		{
@@ -227,7 +235,7 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 
+		/// 最大制限時のステアリング範囲の割合
 		/// </summary>
 		public float LimitedMaxSteerRate
 		{
@@ -242,7 +250,7 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 
+		/// ステアリング範囲の制限が最大になる速さ
 		/// </summary>
 		public float LimitedSteerRateSpeed
 		{
@@ -257,7 +265,7 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 
+		/// 生のアクセル入力
 		/// </summary>
 		public float Gas
 		{
@@ -271,6 +279,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 生のブレーキ入力
+		/// </summary>
 		public float Brake
 		{
 			private get
@@ -283,6 +294,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// ハンドブレーキ入力
+		/// </summary>
 		public float HandBrake
 		{
 			private get
@@ -295,6 +309,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// ギアの入力
+		/// </summary>
 		public int Gear
 		{
 			private get
@@ -307,6 +324,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 生のステアリング割合の入力
+		/// </summary>
 		public float SteerRate
 		{
 			private get
@@ -319,36 +339,43 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 調節済みのアクセル入力
+		/// </summary>
 		public float AdjustedGas { get; private set; }
 
+		/// <summary>
+		/// 調節済みのブレーキ入力
+		/// </summary>
 		public float AdjustedBrake { get; private set; }
 
-
+		/// <summary>
+		/// 調節済みのステアリング割合の入力
+		/// </summary>
 		public float AdjustedSteerRate { get; private set; }
 
-
+		/// <summary>
+		/// 車体コンポーネント
+		/// </summary>
 		private Body Body { get; set; }
 
+		/// <summary>
+		/// 動力系コンポーネント
+		/// </summary>
 		private Powertrain Powertrain { get; set; }
 
+		/// <summary>
+		/// 足回りのコンポーネント
+		/// </summary>
 		private Suspension Suspension { get; set; }
 
+		/// <summary>
+		/// 剛体コンポーネント
+		/// </summary>
 		private Rigidbody Rigidbody { get; set; }
 
-
-
-		public void ShiftUp()
-		{
-
-		}
-
-		public void ShiftDown()
-		{
-
-		}
-
 		/// <summary>
-		/// 
+		/// 初期化時に呼ばれるメソッド
 		/// </summary>
 		private void Start()
 		{
@@ -359,74 +386,59 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 
+		/// 毎物理フレームに呼ばれるメソッド
 		/// </summary>
 		private void FixedUpdate()
 		{
-			// 
+			// 各種入力を調節する
 			AdjustGas();
-			//
 			AdjustBrake();
-
 			AdjustSteerRate();
-
-
-			// 
+			// 各コンポーネントに入力を伝達
 			Powertrain.Throttle = AdjustedGas;
-
 			Powertrain.Gear = Mathf.Min(Gear, Powertrain.TopGear);
-
 			Suspension.Brake = AdjustedBrake;
-
 			Suspension.HandBrake = HandBrake;
-
 			Suspension.SteerRate = AdjustedSteerRate;
-
-
-
 		}
 
 		/// <summary>
-		/// 
+		/// アクセルを調節する
 		/// </summary>
 		private void AdjustGas()
 		{
-
+			// TCSが有効な場合はスリップを抑えるようにをアクセルを調節する
 			if (UseTractionControl)
 			{
-
-
-				// 駆動輪のみ？
+				// 加速による駆動輪のスリップを求める
 				float accelerationSlip = Mathf.Max(Suspension.ForwardSlip, 0f);
-
-				//
-				float extremumSlip = Suspension.ForwardExtremumSlip * (1f - TractionControlSlipMargin);
-
+				// 目標スリップを求める
+				float targetSlip = Suspension.ForwardExtremumSlip * (1f - TractionControlSlipMargin);
+				// TCSを適用した場合の補正値を求める
 				float tcsGas = AdjustedGas * (1f - TractionControlEpsilon);
-
-				if (accelerationSlip > extremumSlip)
+				// スリップが目標より多い場合
+				if (accelerationSlip > targetSlip)
 				{
-					//
+					// 入力がTCS補正値より小さければそのまま
 					if (Gas < tcsGas)
 					{
 						AdjustedGas = Gas;
 					}
-					//
+					// 入力がTCS補正値以上ならばTCSを作動
 					else
 					{
-						Debug.Log("TCS");
 						AdjustedGas = tcsGas;
 					}
 				}
-				//
+				// スリップが目標以下である場合
 				else
 				{
-					//
+					// 入力が直前のものより小さければ直ちに従う
 					if (Gas < AdjustedGas)
 					{
 						AdjustedGas = Gas;
 					}
-					//
+					// 入力が直前のもの以上ならば踏み込みを制限する
 					else
 					{
 						AdjustedGas = Mathf.MoveTowards(AdjustedGas, Gas, TractionControlMaxGasDelta);
@@ -438,50 +450,45 @@ namespace Speedcar
 			{
 				AdjustedGas = Gas;
 			}
-
 		}
 
 		/// <summary>
-		/// 
+		/// ブレーキを調節する
 		/// </summary>
 		private void AdjustBrake()
 		{
 			// ABSがついている場合はスリップをタイヤ摩擦の線形領域に収める制御を行う
 			if (UseAntiLockBrake)
 			{
-				//const float eps = 0.3f;
-				//const float maxBrakeDelta = 1f;
-
-				//
+				// ブレーキングによるスリップを求める
 				float brakingSlip = -Mathf.Min(Suspension.ForwardSlip, 0f);
-				//
-				float extremumSlip = Suspension.ForwardExtremumSlip * (1f - AntiLockBrakeSlipMargin);
-				//
+				// 目標スリップを求める
+				float targetSlip = Suspension.ForwardExtremumSlip * (1f - AntiLockBrakeSlipMargin);
+				// ABSを適用した場合の補正値を求める
 				float absBrake = AdjustedBrake * (1f - AntiLockBrakeEpsilon);
-				//
-				if (brakingSlip > extremumSlip)
+				// スリップが目標より多い場合
+				if (brakingSlip > targetSlip)
 				{
-					//
+					// 入力がABS補正値より小さければそのまま
 					if (Brake < absBrake)
 					{
 						AdjustedBrake = Brake;
 					}
-					//
+					// 入力がABS補正値以上ならばABSを作動
 					else
 					{
-						Debug.Log("ABS");
 						AdjustedBrake = absBrake;
 					}
 				}
-				//
+				// スリップが目標以下である場合
 				else
 				{
-					//
+					// 入力が直前のものより小さければ直ちに従う
 					if (Brake < AdjustedBrake)
 					{
 						AdjustedBrake = Brake;
 					}
-					//
+					// 入力が直前のもの以上ならば踏み込みを制限する
 					else
 					{
 						AdjustedBrake = Mathf.MoveTowards(AdjustedBrake, Brake, AntiLockBrakeMaxStepDelta);
