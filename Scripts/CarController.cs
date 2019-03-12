@@ -8,7 +8,7 @@ namespace Speedcar
 	[RequireComponent(typeof(Powertrain), typeof(Suspension), typeof(Body)), DisallowMultipleComponent]
 	public class CarController : MonoBehaviour
 	{
-		
+
 		[SerializeField]
 		private bool antiLockBrake = true;
 
@@ -21,16 +21,18 @@ namespace Speedcar
 		[SerializeField]
 		private float maxBrakeDelta = 0.6f;
 
-		/*
-		[SerializeField]
-		private bool launchControl = true;
-
-		[SerializeField]
-		private float launchSpeedThreshold= 10f;
-		*/
 		[SerializeField]
 		private bool tractionControl = true;
-		
+
+		[SerializeField]
+		private float tractionControlDelta = 0.1f;
+
+		[SerializeField]
+		private float tractionControlSlipMargin = 0.1f;
+
+		[SerializeField]
+		private float maxGasDelta = 0.2f;
+
 
 
 		[SerializeField]
@@ -159,7 +161,53 @@ namespace Speedcar
 				tractionControl = value;
 			}
 		}
-		
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public float TractionControlDelta
+		{
+			get
+			{
+				return tractionControlDelta;
+			}
+			set
+			{
+				tractionControlDelta = Mathf.Clamp01(value);
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public float TractionControlSlipMargin
+		{
+			get
+			{
+				return tractionControlSlipMargin;
+			}
+			set
+			{
+				tractionControlSlipMargin = Mathf.Clamp01(value);
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public float MaxGasDelta
+		{
+			get
+			{
+				return maxBrakeDelta;
+			}
+			set
+			{
+				maxBrakeDelta = Mathf.Clamp01(value);
+			}
+		}
+
+
 
 		/// <summary>
 		/// 
@@ -290,7 +338,7 @@ namespace Speedcar
 			Suspension.SteerRate = AdjustedSteerRate;
 
 
-			
+
 		}
 
 		/// <summary>
@@ -299,29 +347,53 @@ namespace Speedcar
 		private void AdjustGas()
 		{
 
-
 			if (TractionControl)
 			{
-				AdjustedGas = Gas;
-
-				const float eps = 0.2f;
-				//float speed = Rigidbody.transform.InverseTransformDirection(Rigidbody.velocity).z;
 
 
 				// 駆動輪のみ？
 				float accelerationSlip = Mathf.Max(Suspension.ForwardSlip, 0f);
 
 				//
-				float extremumSlip = Suspension.ForwardExtremumSlip / Mathf.Sqrt(2f);
+				float extremumSlip = Suspension.ForwardExtremumSlip * (1f - TractionControlSlipMargin);
 
-				AdjustedGas = Gas;
+				float tcsGas = AdjustedGas * (1f - TractionControlDelta);
+
+				if (accelerationSlip > extremumSlip)
+				{
+					//
+					if (Gas < tcsGas)
+					{
+						AdjustedGas = Gas;
+					}
+					//
+					else
+					{
+						Debug.Log("TCS");
+						AdjustedGas = tcsGas;
+					}
+				}
+				//
+				else
+				{
+					//
+					if (Gas < AdjustedGas)
+					{
+						AdjustedGas = Gas;
+					}
+					//
+					else
+					{
+						AdjustedGas = Mathf.MoveTowards(AdjustedGas, Gas, MaxGasDelta);
+					}
+				}
 			}
-			// TCS/LCSがない場合は入力をそのまま使用する
+			// TCSがない場合は入力をそのまま使用する
 			else
 			{
 				AdjustedGas = Gas;
 			}
-			
+
 		}
 
 		/// <summary>
