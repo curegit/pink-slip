@@ -60,19 +60,19 @@ namespace Speedcar
 		/// 
 		/// </summary>
 		[SerializeField]
-		private bool useSteerLimit = true;
+		private bool limitSteerRate = true;
 
 		/// <summary>
 		/// 
 		/// </summary>
 		[SerializeField]
-		private float minSteerLimit = 0.2f;
+		private float limitedMaxSteerRate = 0.2f;
 
 		/// <summary>
 		/// 
 		/// </summary>
 		[SerializeField]
-		private float minSteerLimitSpeed = 90f;
+		private float limitedSteerRateSpeed = 90f;
 
 
 
@@ -213,45 +213,45 @@ namespace Speedcar
 		/// <summary>
 		/// 
 		/// </summary>
-		public bool UseSteerLimit
+		public bool LimitSteerRate
 		{
 			get
 			{
-				return useSteerLimit;
+				return limitSteerRate;
 			}
 			set
 			{
-				useSteerLimit = value;
+				limitSteerRate = value;
 			}
 		}
 
 		/// <summary>
 		/// 
 		/// </summary>
-		public float MinSteerLimit
+		public float LimitedMaxSteerRate
 		{
 			get
 			{
-				return minSteerLimit;
+				return limitedMaxSteerRate;
 			}
 			set
 			{
-				minSteerLimit = Mathf.Clamp01(value);
+				limitedMaxSteerRate = Mathf.Clamp01(value);
 			}
 		}
 
 		/// <summary>
 		/// 
 		/// </summary>
-		public float MinSteerLimitSpeed
+		public float LimitedSteerRateSpeed
 		{
 			get
 			{
-				return minSteerLimitSpeed;
+				return limitedSteerRateSpeed;
 			}
 			set
 			{
-				minSteerLimitSpeed = Mathf.Max(value, 0f);
+				limitedSteerRateSpeed = Mathf.Max(value, 0f);
 			}
 		}
 
@@ -499,9 +499,9 @@ namespace Speedcar
 		/// </summary>
 		public void AdjustSteerRate()
 		{
-			if (UseSteerLimit)
+			if (LimitSteerRate)
 			{
-				AdjustedSteerRate = Mathf.Lerp(SteerRate, SteerRate * MinSteerLimit, Mathf.InverseLerp(0f, MinSteerLimitSpeed, Mathf.Abs(Body.ForwardVelocity)));
+				AdjustedSteerRate = Mathf.Lerp(SteerRate, SteerRate * LimitedMaxSteerRate, Mathf.InverseLerp(0f, LimitedSteerRateSpeed, Mathf.Abs(Body.ForwardVelocity)));
 			}
 			else
 			{
