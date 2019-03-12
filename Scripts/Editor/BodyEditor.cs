@@ -34,6 +34,7 @@ namespace Speedcar.EditorOnly
 			Body.LinearDrag = EditorGUILayout.Vector3Field("Linear Drag", Body.LinearDrag);
 			Body.QuadraticDrag = EditorGUILayout.Vector3Field("Quadratic Drag", Body.QuadraticDrag);
 			Body.DownforceCoefficient = EditorGUILayout.FloatField("Downforce Coefficient", Body.DownforceCoefficient);
+			Body.DownforceShift = EditorGUILayout.FloatField("Downforce Shift", Body.DownforceShift);
 			Body.MaxDownforce = EditorGUILayout.FloatField("Max Downforce", Body.MaxDownforce);
 			// 衝突について
 			Header("Collision");

@@ -51,6 +51,12 @@ namespace Speedcar
 		private float downforceCoefficient = 1f;
 
 		/// <summary>
+		/// 重心から後ろへのダウンフォース作用点のずらしのバッキングフィールド
+		/// </summary>
+		[SerializeField]
+		private float downforceShift = 0.2f;
+
+		/// <summary>
 		/// ダウンフォースの上限のバッキングフィールド
 		/// </summary>
 		[SerializeField]
@@ -200,6 +206,21 @@ namespace Speedcar
 			set
 			{
 				downforceCoefficient = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// 重心から後ろへのダウンフォース作用点のずらし
+		/// </summary>
+		public float DownforceShift
+		{
+			get
+			{
+				return downforceShift;
+			}
+			set
+			{
+				downforceShift = value;
 			}
 		}
 
@@ -392,8 +413,9 @@ namespace Speedcar
 		/// </summary>
 		private void AddDownforce()
 		{
-			var downforce = Mathf.Clamp(Mathf.Pow(ForwardVelocity, 2f) * DownforceCoefficient, 0f, MaxDownforce);
-			Rigidbody.AddRelativeForce(Vector3.down * downforce, ForceMode.Force);
+			var downforce = Rigidbody.rotation * Vector3.down * Mathf.Clamp(Mathf.Pow(ForwardVelocity, 2f) * DownforceCoefficient, 0f, MaxDownforce);
+			var position = Rigidbody.worldCenterOfMass + Rigidbody.rotation * Vector3.back * downforceShift;
+			Rigidbody.AddForceAtPosition(downforce, position, ForceMode.Force);
 		}
 
 		/// <summary>
