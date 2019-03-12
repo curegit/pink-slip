@@ -55,6 +55,7 @@ namespace Speedcar
 		/// </summary>
 		[SerializeField]
 		private float tractionControlMaxGasDelta = 0.3f;
+		private float tractionControlMaxGasDelta = 0.4f;
 
 		/// <summary>
 		/// 
