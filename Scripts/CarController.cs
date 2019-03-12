@@ -505,7 +505,7 @@ namespace Speedcar
 		/// <summary>
 		/// ステアリング角度を調節する
 		/// </summary>
-		public void AdjustSteerRate()
+		private void AdjustSteerRate()
 		{
 			if (LimitSteerRate)
 			{
