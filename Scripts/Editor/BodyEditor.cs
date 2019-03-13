@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using UnityEditor;
+﻿using UnityEditor;
 
 namespace Speedcar.EditorOnly
 {
@@ -13,7 +12,7 @@ namespace Speedcar.EditorOnly
 		/// 対象コンポーネント
 		/// </summary>
 		private Body Body => (Body)target;
-		
+
 		/// <summary>
 		/// インスペクターを拡張する
 		/// </summary>
@@ -24,24 +23,32 @@ namespace Speedcar.EditorOnly
 			// リジッドボディについて
 			Space();
 			Header("Rigidbody");
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("centerOfMass"));
-			Body.InertiaTensor = EditorGUILayout.Vector3Field("Moment of Inertia", Body.InertiaTensor);
-			Body.InertiaTensorRotation = EditorGUILayout.Vector3Field("Inertia Rotation", Body.InertiaTensorRotation);
-			Body.GravityMultiplier = EditorGUILayout.Slider("Gravity Multiplier", Body.GravityMultiplier, 0.5f, 3f);
-			Body.MaxAngularSpeed = EditorGUILayout.Slider("Max Angular Speed", Body.MaxAngularSpeed, 0.5f, 6.2f);
-			Body.SolverIterations = EditorGUILayout.IntSlider("Solver Iterations", Body.SolverIterations, 1, 32);
-			Body.SolverVelocityIterations = EditorGUILayout.IntSlider("Solver Velocity Iterations", Body.SolverVelocityIterations, 1, 32);
+			EditorGUI.indentLevel++;
+			PropertyField("centerOfMass");
+			PropertyField("inertiaTensor", "Moment Of Inertia");
+			PropertyField("inertiaTensorRotation", "Principal Axes Of Inertia");
+			Slider("gravityMultiplier", 0.5f, 3f);
+			Slider("maxAngularSpeed", 0.5f, 6.2f);
+			IntSlider("solverIterations", 1, 32);
+			IntSlider("solverVelocityIterations", 1, 32);
+			EditorGUI.indentLevel--;
 			// 空力について
+			Space();
 			Header("Aerodynamics");
-			Body.LinearDrag = EditorGUILayout.Vector3Field("Linear Drag", Body.LinearDrag);
-			Body.QuadraticDrag = EditorGUILayout.Vector3Field("Quadratic Drag", Body.QuadraticDrag);
-			Body.DownforceCoefficient = EditorGUILayout.FloatField("Downforce Coefficient", Body.DownforceCoefficient);
-			Body.DownforceShift = EditorGUILayout.FloatField("Downforce Shift", Body.DownforceShift);
-			Body.MaxDownforce = EditorGUILayout.FloatField("Max Downforce", Body.MaxDownforce);
+			EditorGUI.indentLevel++;
+			PropertyField("linearDrag");
+			PropertyField("quadraticDrag");
+			PropertyField("downforceCoefficient");
+			PropertyField("downforceShift");
+			PropertyField("maxDownforce");
+			EditorGUI.indentLevel--;
 			// 衝突について
+			Space();
 			Header("Collision");
-			Body.MaxDepenetrationSpeed = EditorGUILayout.Slider("Max Depenetration Speed", Body.MaxDepenetrationSpeed, 10f, 50f);
-			Body.MaxAngularVelocityDeltaOnCollision = EditorGUILayout.Slider("Max Angular Velocity Delta", Body.MaxAngularVelocityDeltaOnCollision, 0f, 10f);
+			EditorGUI.indentLevel++;
+			Slider("maxDepenetrationSpeed", 10f, 50f);
+			Slider("maxAngularVelocityDeltaOnCollision", 0f, 10f, "Max Angular Velocity Delta");
+			EditorGUI.indentLevel--;
 			// 更新する
 			serializedObject.ApplyModifiedProperties();
 		}
