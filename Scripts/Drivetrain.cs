@@ -8,16 +8,16 @@
 		/// <summary>
 		/// 後輪駆動
 		/// </summary>
-		RWD = 1,
+		RearWheelDrive = 1,
 
 		/// <summary>
 		/// 前輪駆動
 		/// </summary>
-		FWD = 2,
+		FrontWheelDrive = 2,
 
 		/// <summary>
 		/// 四輪駆動
 		/// </summary>
-		AWD = 4,
+		AllWheelDrive = 4,
 	}
 }

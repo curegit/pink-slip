@@ -102,7 +102,7 @@ namespace Speedcar
 
 
 		[SerializeField]
-		private Drivetrain drivetrain = Drivetrain.AWD;
+		private Drivetrain drivetrain = Drivetrain.AllWheelDrive;
 
 		[SerializeField]
 		private float frontDifferentialLocking = 0.5f;
@@ -747,15 +747,15 @@ namespace Speedcar
 				switch (Drivetrain)
 				{
 					// 前輪駆動の場合
-					case Drivetrain.FWD:
+					case Drivetrain.FrontWheelDrive:
 						wheelRPM = Suspension.FrontWheelColliders.Average(x => x.rpm);
 						break;
 					// 後輪駆動の場合
-					case Drivetrain.RWD:
+					case Drivetrain.RearWheelDrive:
 						wheelRPM = Suspension.RearWheelColliders.Average(x => x.rpm);
 						break;
 					// 四輪駆動の場合
-					case Drivetrain.AWD:
+					case Drivetrain.AllWheelDrive:
 						float frontWheelRPM = Suspension.FrontWheelColliders.Average(x => x.rpm);
 						float rearWheelRPM = Suspension.RearWheelColliders.Average(x => x.rpm);
 						wheelRPM = (frontWheelRPM + rearWheelRPM) / 2f;
@@ -827,7 +827,7 @@ namespace Speedcar
 			// 変速機を通してトルクを変換
 			float torque = Transmission(Torque);
 			// 前輪駆動の場合
-			if (Drivetrain == Drivetrain.FWD)
+			if (Drivetrain == Drivetrain.FrontWheelDrive)
 			{
 				// 前輪のデフを通してトルクを伝達
 				float frontLeftRPM = Math.Abs(Suspension.FrontLeftWheelCollider.rpm);
@@ -845,7 +845,7 @@ namespace Speedcar
 				}
 			}
 			// 後輪駆動の場合
-			else if (Drivetrain == Drivetrain.RWD)
+			else if (Drivetrain == Drivetrain.RearWheelDrive)
 			{
 				// 後輪のデフを通してトルクを伝達
 				float rearLeftRPM = Math.Abs(Suspension.RearLeftWheelCollider.rpm);
@@ -863,7 +863,7 @@ namespace Speedcar
 				}
 			}
 			// 四輪駆動の場合
-			else if (Drivetrain == Drivetrain.AWD)
+			else if (Drivetrain == Drivetrain.AllWheelDrive)
 			{
 				// センターデフの動作を再現
 				float frontRPM = Math.Abs(Suspension.FrontWheelColliders.Average(x => x.rpm));
@@ -913,7 +913,7 @@ namespace Speedcar
 				switch (Drivetrain)
 				{
 					// 前輪駆動の場合
-					case Drivetrain.FWD:
+					case Drivetrain.FrontWheelDrive:
 						foreach (var wheelCollider in Suspension.FrontWheelColliders)
 						{
 							wheelCollider.wheelDampingRate = totalDamping;
@@ -924,7 +924,7 @@ namespace Speedcar
 						}
 						break;
 					// 後輪駆動の場合
-					case Drivetrain.RWD:
+					case Drivetrain.RearWheelDrive:
 						foreach (var wheelCollider in Suspension.FrontWheelColliders)
 						{
 							wheelCollider.wheelDampingRate = WheelDampingRate;
@@ -935,7 +935,7 @@ namespace Speedcar
 						}
 						break;
 					// 四輪駆動の場合
-					case Drivetrain.AWD:
+					case Drivetrain.AllWheelDrive:
 						foreach (var wheelCollider in Suspension.WheelColliders)
 						{
 							wheelCollider.wheelDampingRate = totalDamping;
