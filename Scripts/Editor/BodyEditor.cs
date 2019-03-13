@@ -6,7 +6,7 @@ namespace Speedcar.EditorOnly
 	/// <summary>
 	/// 車体コンポーネントのエディタ拡張
 	/// </summary>
-	[CustomEditor(typeof(Body))]
+	[CustomEditor(typeof(Body)), CanEditMultipleObjects]
 	public class BodyEditor : SpeedcarEditor
 	{
 		/// <summary>
