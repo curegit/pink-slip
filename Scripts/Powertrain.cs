@@ -965,7 +965,7 @@ namespace Speedcar
 			switch (TorqueCurveModel)
 			{
 				case TorqueCurveModel.Parametric:
-					torque = ParametricTorqueCurve != null ? ParametricTorqueCurve.EngineTorque(rpm) : 0f;
+					torque = ParametricTorqueCurve != null ? ParametricTorqueCurve.EngineTorque(rpm, IdlingRPM, MaxRPM) : 0f;
 					break;
 				case TorqueCurveModel.AnimationCurve:
 					torque = TorqueAnimationCurve != null && TorqueAnimationCurve.length > 0 ? TorqueAnimationCurve.Evaluate(rpm) : 0f;

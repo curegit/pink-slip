@@ -10,28 +10,55 @@ namespace Speedcar
 	public class ParametricTorqueCurve
 	{
 		/// <summary>
+		/// アイドリング回転数のトルクのバッキングフィールド
+		/// </summary>
+		[SerializeField]
+		private float idlingTorque = 280f;
+
+		/// <summary>
 		/// トルクの最大値のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float maxTorque = 650f;
+		private float maxTorque = 580f;
 
 		/// <summary>
-		/// トルクが最大値をとる回転数のバッキングフィールド
+		/// トルクが最大値をとる下限の回転数のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float maxTorqueRPM = 5000f;
+		private float maxTorqueLowerRPM = 3200f;
 
 		/// <summary>
-		/// 
+		/// トルクが最大値をとる上限の回転数のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float asymptoteTorque = 400f;
+		private float maxTorqueUpperRPM = 5600f;
 
 		/// <summary>
-		/// 
+		/// レッドライン境界のトルクのバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float redline = 7000f;
+		private float redlineTorque = 460f;
+
+		/// <summary>
+		/// レッドライン境界のRPMのバッキングフィールド
+		/// </summary>
+		[SerializeField]
+		private float redline = 7200f;
+
+		/// <summary>
+		/// アイドリング回転数のトルク
+		/// </summary>
+		public float IdlingTorque
+		{
+			get
+			{
+				return idlingTorque;
+			}
+			set
+			{
+				idlingTorque = Mathf.Max(value, 0f);
+			}
+		}
 
 		/// <summary>
 		/// トルクの最大値
@@ -49,37 +76,52 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// トルクが最大値をとる回転数
+		/// トルクが最大値をとる下限の回転数
 		/// </summary>
-		public float MaxTorqueRPM
+		public float MaxTorqueLowerRPM
 		{
 			get
 			{
-				return maxTorqueRPM;
+				return maxTorqueLowerRPM;
 			}
 			set
 			{
-				maxTorqueRPM = Mathf.Max(value, 0f);
+				maxTorqueLowerRPM = Mathf.Max(value, 0f);
 			}
 		}
 
 		/// <summary>
-		/// 
+		/// トルクが最大値をとる上限の回転数
 		/// </summary>
-		public float AsymptoteTorque
+		public float MaxTorqueUpperRPM
 		{
 			get
 			{
-				return asymptoteTorque;
+				return maxTorqueUpperRPM;
 			}
 			set
 			{
-				asymptoteTorque = Mathf.Max(value, 0f);
+				maxTorqueUpperRPM = Mathf.Max(value, 0f);
 			}
 		}
 
 		/// <summary>
-		/// 
+		/// レッドライン境界のトルク
+		/// </summary>
+		public float RedlineTorque
+		{
+			get
+			{
+				return redlineTorque;
+			}
+			set
+			{
+				redlineTorque = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// レッドライン境界のRPM
 		/// </summary>
 		public float Redline
 		{
@@ -97,26 +139,61 @@ namespace Speedcar
 		/// ある回転数における出力トルク返す
 		/// </summary>
 		/// <param name="rpm">回転数</param>
+		/// <param name="idlingRPM">アイドリング回転数</param>
+		/// <param name="maxRPM">最大の回転数</param>
 		/// <returns>トルク</returns>
-		public float EngineTorque(float rpm)
+		public float EngineTorque(float rpm, float idlingRPM, float maxRPM)
 		{
 			if (rpm < 0f)
 			{
 				return 0f;
 			}
-			else if (rpm < MaxTorqueRPM)
+			else if (rpm < idlingRPM)
 			{
-				return MaxTorque * (-Mathf.Pow(rpm / MaxTorqueRPM - 1f, 2f) + 1f);
+				return Mathf.Lerp(0f, IdlingTorque, rpm / idlingRPM);
+			}
+			else if (rpm < MaxTorqueLowerRPM)
+			{
+				return MaxTorque * (-Mathf.Pow(rpm / MaxTorqueLowerRPM - 1f, 2f) + 1f);
+			}
+			else if (rpm < MaxTorqueUpperRPM)
+			{
+				return MaxTorque;
 			}
 			else if (rpm < Redline)
 			{
-				float t = Mathf.InverseLerp(MaxTorqueRPM, Redline, rpm);
-				return (0.5f * Mathf.Cos(t * Mathf.PI) + 0.5f) * (MaxTorque - AsymptoteTorque) + AsymptoteTorque;
+				float t = Mathf.InverseLerp(MaxTorqueUpperRPM, Redline, rpm);
+				return Bias(MaxTorque, RedlineTorque, t, 0.2f);
 			}
 			else
 			{
-				return AsymptoteTorque;
+				float t = Mathf.InverseLerp(Redline, maxRPM, rpm);
+				return Bias(RedlineTorque, 0f, t, 0.6f);
 			}
+		}
+
+		/// <summary>
+		/// 偏りのある補間関数
+		/// </summary>
+		/// <param name="x">値</param>
+		/// <param name="bias">偏り</param>
+		/// <returns>補間値</returns>
+		private static float Bias(float x, float bias = 0.5f)
+		{
+			return Mathf.Pow(x, Mathf.Log(bias) / Mathf.Log(0.5f));
+		}
+
+		/// <summary>
+		/// 偏りのある補間関数
+		/// </summary>
+		/// <param name="a">開始値</param>
+		/// <param name="b">終了値</param>
+		/// <param name="t">媒介変数</param>
+		/// <param name="bias">偏り</param>
+		/// <returns>補間値</returns>
+		private static float Bias(float a, float b, float t, float bias = 0.5f)
+		{
+			return Mathf.Lerp(a, b, Bias(t, bias));
 		}
 	}
 }
