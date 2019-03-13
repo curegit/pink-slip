@@ -19,10 +19,12 @@ namespace Speedcar.EditorOnly
 		/// </summary>
 		public override void OnInspectorGUI()
 		{
+			// 同期する
+			serializedObject.Update();
 			// リジッドボディについて
 			Space();
 			Header("Rigidbody");
-			Body.CenterOfMass = EditorGUILayout.ObjectField("Center of Mass", Body.CenterOfMass, typeof(Transform), true) as Transform;
+			EditorGUILayout.PropertyField(serializedObject.FindProperty("centerOfMass"));
 			Body.InertiaTensor = EditorGUILayout.Vector3Field("Moment of Inertia", Body.InertiaTensor);
 			Body.InertiaTensorRotation = EditorGUILayout.Vector3Field("Inertia Rotation", Body.InertiaTensorRotation);
 			Body.GravityMultiplier = EditorGUILayout.Slider("Gravity Multiplier", Body.GravityMultiplier, 0.5f, 3f);
@@ -40,6 +42,8 @@ namespace Speedcar.EditorOnly
 			Header("Collision");
 			Body.MaxDepenetrationSpeed = EditorGUILayout.Slider("Max Depenetration Speed", Body.MaxDepenetrationSpeed, 10f, 50f);
 			Body.MaxAngularVelocityDeltaOnCollision = EditorGUILayout.Slider("Max Angular Velocity Delta", Body.MaxAngularVelocityDeltaOnCollision, 0f, 10f);
+			// 更新する
+			serializedObject.ApplyModifiedProperties();
 		}
 	}
 }
