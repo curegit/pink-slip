@@ -66,7 +66,7 @@ namespace Speedcar
 		/// 重心から後ろへのダウンフォース作用点のずらしのバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float downforceShift = 0.2f;
+		private float downforceShift = 0.1f;
 
 		/// <summary>
 		/// ダウンフォースの上限のバッキングフィールド
