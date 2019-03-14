@@ -23,7 +23,7 @@ namespace Speedcar.EditorOnly
 			// リジッドボディについて
 			Space();
 			Header("Rigidbody");
-			EditorGUI.indentLevel++;
+			IncreaseIndent();
 			PropertyField("centerOfMassConfig");
 			if (Body.CenterOfMassConfig == CenterOfMassConfig.Offset) PropertyField("centerOfMassOffset");
 			if (Body.CenterOfMassConfig == CenterOfMassConfig.Transform) PropertyField("centerOfMassTransform");
@@ -33,24 +33,24 @@ namespace Speedcar.EditorOnly
 			PropertyField("maxAngularSpeed");
 			PropertyField("solverIterations");
 			PropertyField("solverVelocityIterations");
-			EditorGUI.indentLevel--;
+			DecreaseIndent();
 			// 空力について
 			Space();
 			Header("Aerodynamics");
-			EditorGUI.indentLevel++;
+			IncreaseIndent();
 			PropertyField("linearDrag");
 			PropertyField("quadraticDrag");
 			PropertyField("downforceCoefficient");
 			PropertyField("downforceShift");
 			PropertyField("maxDownforce");
-			EditorGUI.indentLevel--;
+			DecreaseIndent();
 			// 衝突について
 			Space();
 			Header("Collision");
-			EditorGUI.indentLevel++;
+			IncreaseIndent();
 			PropertyField("maxDepenetrationSpeed");
 			PropertyField("maxAngularVelocityDeltaOnCollision", "Max Angular Velocity Delta");
-			EditorGUI.indentLevel--;
+			DecreaseIndent();
 			// 更新する
 			serializedObject.ApplyModifiedProperties();
 		}

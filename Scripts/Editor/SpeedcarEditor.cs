@@ -26,6 +26,22 @@ namespace Speedcar.EditorOnly
 		}
 
 		/// <summary>
+		/// インデントを増やす
+		/// </summary>
+		protected void IncreaseIndent()
+		{
+			EditorGUI.indentLevel++;
+		}
+
+		/// <summary>
+		/// インデントを減らす
+		/// </summary>
+		protected void DecreaseIndent()
+		{
+			EditorGUI.indentLevel--;
+		}
+
+		/// <summary>
 		/// 既定の方法でフィールドを表示する
 		/// </summary>
 		/// <param name="field">フィールド名</param>
