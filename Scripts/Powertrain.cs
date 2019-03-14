@@ -78,7 +78,7 @@ namespace Speedcar
 		private float maxAdditionalForcedPressure;
 
 		[SerializeField]
-		private float forcedPressureDeltaCoefficient;
+		private float forcedPressureMaxDeltaRate = 1.2f;
 
 
 
@@ -384,18 +384,18 @@ namespace Speedcar
 		/// <summary>
 		/// 
 		/// </summary>
-		public float ForcedPressureDeltaCoefficient
+		public float ForcedPressureMaxDeltaRate
 		{
 			get
 			{
-				return forcedPressureDeltaCoefficient;
+				return forcedPressureMaxDeltaRate;
 			}
 			set
 			{
-				forcedPressureDeltaCoefficient = Mathf.Max(value, 0f);
+				forcedPressureMaxDeltaRate = Mathf.Clamp01(value);
 			}
 		}
-		
+
 		/// <summary>
 		/// 亜酸化窒素噴射システムを搭載しているか
 		/// </summary>
@@ -698,13 +698,15 @@ namespace Speedcar
 			{
 				// 目標過給圧を求める
 				float target = Mathf.Lerp(MinPressure, MaxPressure, Throttle);
+				// フレームごとの最大の加圧を求める
+				float maxDelta = Time.fixedDeltaTime * ForcedPressureMaxDeltaRate * (MaxPressure - MinPressure);
 				// ターボチャージャーの場合
 				if (ForcedInductionDevice == ForcedInduction.Turbocharger)
 				{
 					// 圧力の上昇速度は排気量に比例
 					if (target > Pressure)
 					{
-						Pressure = Mathf.MoveTowards(Pressure, target, ForcedPressureDeltaCoefficient * RPM * Throttle * Time.fixedDeltaTime);
+						Pressure = Mathf.MoveTowards(Pressure, target, Mathf.Lerp(0f, maxDelta, Mathf.InverseLerp(0f, RevLimit, RPM * Throttle)));
 					}
 					// 圧力の減少は直ちに従う
 					else
@@ -715,10 +717,10 @@ namespace Speedcar
 				// スーパーチャージャーの場合
 				else if (ForcedInductionDevice == ForcedInduction.Supercharger)
 				{
-					// 圧力の上昇速度は出力に比例
+					// 圧力の上昇速度はスロットル開度に比例
 					if (target > Pressure)
 					{
-						Pressure = Mathf.MoveTowards(Pressure, target, ForcedPressureDeltaCoefficient * Torque * 10f * Time.fixedDeltaTime);
+						Pressure = Mathf.MoveTowards(Pressure, target, Mathf.Lerp(0f, maxDelta, Throttle));
 					}
 					// 圧力の減少は直ちに従う
 					else
