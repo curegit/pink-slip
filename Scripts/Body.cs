@@ -18,7 +18,7 @@ namespace Speedcar
 		/// 主慣性モーメントのバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private Vector3 inertiaTensor = new Vector3(1500f, 2000f, 1000f);
+		private Vector3 inertiaTensor = new Vector3(2500f, 2000f, 1500f);
 
 		/// <summary>
 		/// 慣性主軸の回転のバッキングフィールド
@@ -72,7 +72,7 @@ namespace Speedcar
 		/// 接触時における角速度の変化の上限のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float maxAngularVelocityDeltaOnCollision = 0.4f;
+		private float maxAngularVelocityDeltaOnCollision = 0.1f;
 
 		/// <summary>
 		/// 物理ソルバが貫通状態を解決するために導入できる最大の速度のバッキングフィールド
