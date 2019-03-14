@@ -29,10 +29,10 @@ namespace Speedcar.EditorOnly
 			if (Body.CenterOfMassConfig == CenterOfMassConfig.Transform) PropertyField("centerOfMassTransform");
 			PropertyField("inertiaTensor", "Moment Of Inertia");
 			PropertyField("inertiaTensorRotation", "Principal Axes Of Inertia");
-			Slider("gravityMultiplier", 0.5f, 3f);
-			Slider("maxAngularSpeed", 0.5f, 6.2f);
-			IntSlider("solverIterations", 1, 32);
-			IntSlider("solverVelocityIterations", 1, 32);
+			PropertyField("gravityMultiplier");
+			PropertyField("maxAngularSpeed");
+			PropertyField("solverIterations");
+			PropertyField("solverVelocityIterations");
 			EditorGUI.indentLevel--;
 			// 空力について
 			Space();
@@ -48,8 +48,8 @@ namespace Speedcar.EditorOnly
 			Space();
 			Header("Collision");
 			EditorGUI.indentLevel++;
-			Slider("maxDepenetrationSpeed", 10f, 50f);
-			Slider("maxAngularVelocityDeltaOnCollision", 0f, 10f, "Max Angular Velocity Delta");
+			PropertyField("maxDepenetrationSpeed");
+			PropertyField("maxAngularVelocityDeltaOnCollision", "Max Angular Velocity Delta");
 			EditorGUI.indentLevel--;
 			// 更新する
 			serializedObject.ApplyModifiedProperties();

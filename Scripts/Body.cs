@@ -41,7 +41,7 @@ namespace Speedcar
 		/// <summary>
 		/// 重力を追加適用する係数のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0.5f, 3f)]
 		private float gravityMultiplier = 1.2f;
 
 		/// <summary>
@@ -77,31 +77,31 @@ namespace Speedcar
 		/// <summary>
 		/// 角速度の大きさの上限のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0.5f, 6.2f)]
 		private float maxAngularSpeed = 0.8f;
 
 		/// <summary>
 		/// 接触時における角速度の変化の上限のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 10f)]
 		private float maxAngularVelocityDeltaOnCollision = 0.1f;
 
 		/// <summary>
 		/// 物理ソルバが貫通状態を解決するために導入できる最大の速度のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(10f, 50f)]
 		private float maxDepenetrationSpeed = 20f;
 
 		/// <summary>
 		/// 物理ソルバのイテレーション回数のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(1, 32)]
 		private int solverIterations = 16;
 
 		/// <summary>
 		/// 物理ソルバの速度に関するイテレーション回数のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(1, 32)]
 		private int solverVelocityIterations = 8;
 
 		/// <summary>
