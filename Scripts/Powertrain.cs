@@ -750,16 +750,16 @@ namespace Speedcar
 				{
 					// 前輪駆動の場合
 					case Drivetrain.FrontWheelDrive:
-						wheelRPM = Suspension.FrontWheelColliders.Average(x => x.rpm);
+						wheelRPM = Suspension.FrontWheelColliders.Average(x => Mathf.Abs(x.rpm));
 						break;
 					// 後輪駆動の場合
 					case Drivetrain.RearWheelDrive:
-						wheelRPM = Suspension.RearWheelColliders.Average(x => x.rpm);
+						wheelRPM = Suspension.RearWheelColliders.Average(x => Mathf.Abs(x.rpm));
 						break;
 					// 四輪駆動の場合
 					case Drivetrain.AllWheelDrive:
-						float frontWheelRPM = Suspension.FrontWheelColliders.Average(x => x.rpm);
-						float rearWheelRPM = Suspension.RearWheelColliders.Average(x => x.rpm);
+						float frontWheelRPM = Suspension.FrontWheelColliders.Average(x => Mathf.Abs(x.rpm));
+						float rearWheelRPM = Suspension.RearWheelColliders.Average(x => Mathf.Abs(x.rpm));
 						wheelRPM = (frontWheelRPM + rearWheelRPM) / 2f;
 						break;
 				}
