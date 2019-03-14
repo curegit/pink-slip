@@ -418,7 +418,7 @@ namespace Speedcar
 				// 加速による駆動輪のスリップを求める
 				var hits = poweredWheelHits.Where(h => h.HasValue);
 				float forwardSlip = hits.Any() ? hits.Average(h => h.Value.forwardSlip) : 0f;
-				float accelerationSlip = Mathf.Max(forwardSlip, 0f);
+				float accelerationSlip = Mathf.Abs(forwardSlip);
 				// 駆動輪を取得
 				var poweredWheels = Suspension.WheelColliders;
 				if (Powertrain.Drivetrain == Drivetrain.FrontWheelDrive) poweredWheels = Suspension.FrontWheelColliders;
@@ -474,7 +474,7 @@ namespace Speedcar
 			{
 				// ブレーキングによるスリップを求める
 				var hits = Suspension.WheelHits.Where(h => h.HasValue);
-				float brakingSlip = -Mathf.Min(hits.Any() ? hits.Average(h => h.Value.forwardSlip) : 0f, 0f);
+				float brakingSlip = Mathf.Abs(hits.Any() ? hits.Average(h => h.Value.forwardSlip) : 0f);
 				// 目標スリップを求める
 				float forwardExtremumSlip = Suspension.WheelColliders.Average(w => w.forwardFriction.extremumSlip);
 				float targetSlip = forwardExtremumSlip * (1f - AntiLockBrakeSlipMargin);
