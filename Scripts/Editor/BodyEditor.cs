@@ -24,7 +24,9 @@ namespace Speedcar.EditorOnly
 			Space();
 			Header("Rigidbody");
 			EditorGUI.indentLevel++;
-			PropertyField("centerOfMass");
+			PropertyField("centerOfMassConfig");
+			if (Body.CenterOfMassConfig == CenterOfMassConfig.Offset) PropertyField("centerOfMassOffset");
+			if (Body.CenterOfMassConfig == CenterOfMassConfig.Transform) PropertyField("centerOfMassTransform");
 			PropertyField("inertiaTensor", "Moment Of Inertia");
 			PropertyField("inertiaTensorRotation", "Principal Axes Of Inertia");
 			Slider("gravityMultiplier", 0.5f, 3f);

@@ -9,10 +9,22 @@ namespace Speedcar
 	public class Body : MonoBehaviour
 	{
 		/// <summary>
+		/// 重心の設定方法のバッキングフィールド
+		/// </summary>
+		[SerializeField]
+		private CenterOfMassConfig centerOfMassConfig = CenterOfMassConfig.Automatic;
+
+		/// <summary>
+		/// 重心のオフセットのバッキングフィールド
+		/// </summary>
+		[SerializeField]
+		private Vector3 centerOfMassOffset = new Vector3(0f, -0.1f, 0f);
+
+		/// <summary>
 		/// 重心を表すトランスフォームのバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private Transform centerOfMass;
+		private Transform centerOfMassTransform;
 
 		/// <summary>
 		/// 主慣性モーメントのバッキングフィールド
@@ -93,17 +105,47 @@ namespace Speedcar
 		private int solverVelocityIterations = 8;
 
 		/// <summary>
-		/// 重心を表すトランスフォーム
+		/// 重心の設定方法
 		/// </summary>
-		public Transform CenterOfMass
+		public CenterOfMassConfig CenterOfMassConfig
 		{
 			get
 			{
-				return centerOfMass;
+				return centerOfMassConfig;
 			}
 			set
 			{
-				centerOfMass = value;
+				centerOfMassConfig = value;
+			}
+		}
+
+		/// <summary>
+		/// 重心のオフセット
+		/// </summary>
+		public Vector3 CenterOfMassOffset
+		{
+			get
+			{
+				return centerOfMassOffset;
+			}
+			set
+			{
+				centerOfMassOffset = value;
+			}
+		}
+
+		/// <summary>
+		/// 重心を表すトランスフォーム
+		/// </summary>
+		public Transform CenterOfMassTransform
+		{
+			get
+			{
+				return centerOfMassTransform;
+			}
+			set
+			{
+				centerOfMassTransform = value;
 			}
 		}
 
@@ -429,7 +471,40 @@ namespace Speedcar
 			Rigidbody.maxDepenetrationVelocity = MaxDepenetrationSpeed;
 			Rigidbody.inertiaTensor = InertiaTensor;
 			Rigidbody.inertiaTensorRotation = Quaternion.Euler(InertiaTensorRotation);
-			Rigidbody.centerOfMass = CenterOfMass ? Vector3.Scale(transform.InverseTransformPoint(CenterOfMass.position), transform.lossyScale) : Rigidbody.centerOfMass;
+			switch (CenterOfMassConfig)
+			{
+				case CenterOfMassConfig.Default:
+					Rigidbody.ResetCenterOfMass();
+					break;
+				case CenterOfMassConfig.Automatic:
+					Rigidbody.ResetCenterOfMass();
+					var dir = Rigidbody.worldCenterOfMass - GetBodyBounds().center;
+					var center = Rigidbody.worldCenterOfMass + dir * Mathf.Sqrt(2f);
+					Rigidbody.centerOfMass = Vector3.Scale(transform.InverseTransformPoint(center), transform.lossyScale);
+					break;
+				case CenterOfMassConfig.Offset:
+					Rigidbody.ResetCenterOfMass();
+					Rigidbody.centerOfMass = Rigidbody.centerOfMass + CenterOfMassOffset;
+					break;
+				case CenterOfMassConfig.Transform:
+					Rigidbody.centerOfMass = CenterOfMassTransform ? Vector3.Scale(transform.InverseTransformPoint(CenterOfMassTransform.position), transform.lossyScale) : Rigidbody.centerOfMass;
+					break;
+			}
+		}
+
+		/// <summary>
+		/// すべてのコライダーのAABBを返す
+		/// </summary>
+		/// <returns>AABB</returns>
+		private Bounds GetBodyBounds()
+		{
+			var colliders = GetComponentsInChildren<Collider>();
+			var bounds = new Bounds(transform.position, Vector3.zero);
+			foreach (var collider in colliders)
+			{
+				bounds.Encapsulate(collider.bounds);
+			}
+			return bounds;
 		}
 	}
 }
