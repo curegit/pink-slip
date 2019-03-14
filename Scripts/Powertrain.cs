@@ -826,8 +826,8 @@ namespace Speedcar
 		/// </summary>
 		private void ApplyTorque()
 		{
-			// 変速機を通してトルクを変換
-			float torque = Transmission(Torque);
+			// 変速機とクラッチを通してトルクを変換
+			float torque = (1f - Clutch) * Transmission(Torque);
 			// 前輪駆動の場合
 			if (Drivetrain == Drivetrain.FrontWheelDrive)
 			{
