@@ -27,7 +27,7 @@ namespace Speedcar
 		/// トルク曲線のアニメーションカーブ
 		/// </summary>
 		[SerializeField]
-		public AnimationCurve torqueAnimationCurve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1000, 10), new Keyframe(5000, 600), new Keyframe(7800, 800), new Keyframe(8000, 0));
+		private AnimationCurve torqueAnimationCurve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1000, 10), new Keyframe(5000, 600), new Keyframe(7800, 800), new Keyframe(8000, 0));
 
 		/// <summary>
 		/// トルクを定数倍するための乗数
