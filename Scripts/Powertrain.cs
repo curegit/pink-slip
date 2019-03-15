@@ -399,7 +399,7 @@ namespace Speedcar
 		/// <summary>
 		/// 亜酸化窒素噴射システムを搭載しているか
 		/// </summary>
-		private bool HasNitrous
+		public bool HasNitrous
 		{
 			get
 			{
