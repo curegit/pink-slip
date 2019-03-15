@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Speedcar
 {
-	[RequireComponent(typeof(Body)), DisallowMultipleComponent]
+	[RequireComponent(typeof(Body), typeof(Rigidbody)), DisallowMultipleComponent]
 	public class Suspension : MonoBehaviour
 	{
 
@@ -510,6 +510,9 @@ namespace Speedcar
 
 
 
+
+
+
 		public float Brake
 		{
 			get
@@ -608,9 +611,6 @@ namespace Speedcar
 			AdjustForcePoints();
 			ConfigureSuspensionDistance();
 			ConfigureSubsteps();
-
-
-			print(FrontLeftWheelHit.HasValue ? FrontLeftWheelHit.Value.sidewaysSlip.ToString(): "garbage");
 		}
 
 		private void FixedUpdate()
