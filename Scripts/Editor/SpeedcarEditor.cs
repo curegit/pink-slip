@@ -58,45 +58,5 @@ namespace Speedcar.EditorOnly
 				EditorGUILayout.PropertyField(serializedObject.FindProperty(field), new GUIContent(label, tooltip));
 			}
 		}
-
-		/// <summary>
-		/// floatのフィールドを扱うスライダーを表示する
-		/// </summary>
-		/// <param name="field">フィールド名</param>
-		/// <param name="left">左端の値</param>
-		/// <param name="right">右端の値</param>
-		/// <param name="label">ラベルテキスト</param>
-		/// <param name="tooltip">ヒント</param>
-		protected void Slider(string field, float left, float right, string label = null, string tooltip = null)
-		{
-			if (label == null)
-			{
-				EditorGUILayout.Slider(serializedObject.FindProperty(field), left, right);
-			}
-			else
-			{
-				EditorGUILayout.Slider(serializedObject.FindProperty(field), left, right, new GUIContent(label, tooltip));
-			}
-		}
-
-		/// <summary>
-		/// intのフィールドを扱うスライダーを表示する
-		/// </summary>
-		/// <param name="field">フィールド名</param>
-		/// <param name="left">左端の値</param>
-		/// <param name="right">右端の値</param>
-		/// <param name="label">ラベルテキスト</param>
-		/// <param name="tooltip">ヒント</param>
-		protected void IntSlider(string field, int left, int right, string label = null, string tooltip = null)
-		{
-			if (label == null)
-			{
-				EditorGUILayout.IntSlider(serializedObject.FindProperty(field), left, right);
-			}
-			else
-			{
-				EditorGUILayout.Slider(serializedObject.FindProperty(field), left, right, new GUIContent(label, tooltip));
-			}
-		}
 	}
 }
