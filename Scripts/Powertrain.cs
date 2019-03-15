@@ -32,7 +32,7 @@ namespace Speedcar
 		/// <summary>
 		/// トルクを定数倍するための乗数
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 3f)]
 		private float torqueMultiplier = 1f;
 
 		/// <summary>
@@ -104,16 +104,16 @@ namespace Speedcar
 		[SerializeField]
 		private Drivetrain drivetrain = Drivetrain.AllWheelDrive;
 
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float frontDifferentialLocking = 0.5f;
 
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float rearDifferentialLocking = 0.5f;
 
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float centerDifferentialLocking = 1f;
 
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float centerDifferentialBalance = 0.6f;
 
 		[SerializeField]

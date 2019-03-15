@@ -51,7 +51,7 @@ namespace Speedcar.EditorOnly
 		{
 			if (label == null)
 			{
-				EditorGUILayout.PropertyField(serializedObject.FindProperty(field));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty(field), true);
 			}
 			else
 			{
