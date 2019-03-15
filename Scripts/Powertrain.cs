@@ -8,7 +8,7 @@ namespace Speedcar
 	/// <summary>
 	/// 車両の動力系と伝動機構
 	/// </summary>
-	[RequireComponent(typeof(Suspension)), DisallowMultipleComponent]
+	[RequireComponent(typeof(Chassis)), DisallowMultipleComponent]
 	public class Powertrain : MonoBehaviour
 	{
 		/// <summary>
@@ -656,14 +656,14 @@ namespace Speedcar
 		/// <summary>
 		/// 足回りのコンポーネント
 		/// </summary>
-		private Suspension Suspension { get; set; }
+		private Chassis Chassis { get; set; }
 
 		/// <summary>
 		/// 初期化時に呼ばれるメソッド
 		/// </summary>
 		private void Start()
 		{
-			Suspension = GetComponent<Suspension>();
+			Chassis = GetComponent<Chassis>();
 		}
 
 		/// <summary>
@@ -750,16 +750,16 @@ namespace Speedcar
 				{
 					// 前輪駆動の場合
 					case Drivetrain.FrontWheelDrive:
-						wheelRPM = Suspension.FrontWheelColliders.Average(x => Mathf.Abs(x.rpm));
+						wheelRPM = Chassis.FrontWheelColliders.Average(x => Mathf.Abs(x.rpm));
 						break;
 					// 後輪駆動の場合
 					case Drivetrain.RearWheelDrive:
-						wheelRPM = Suspension.RearWheelColliders.Average(x => Mathf.Abs(x.rpm));
+						wheelRPM = Chassis.RearWheelColliders.Average(x => Mathf.Abs(x.rpm));
 						break;
 					// 四輪駆動の場合
 					case Drivetrain.AllWheelDrive:
-						float frontWheelRPM = Suspension.FrontWheelColliders.Average(x => Mathf.Abs(x.rpm));
-						float rearWheelRPM = Suspension.RearWheelColliders.Average(x => Mathf.Abs(x.rpm));
+						float frontWheelRPM = Chassis.FrontWheelColliders.Average(x => Mathf.Abs(x.rpm));
+						float rearWheelRPM = Chassis.RearWheelColliders.Average(x => Mathf.Abs(x.rpm));
 						wheelRPM = (frontWheelRPM + rearWheelRPM) / 2f;
 						break;
 				}
@@ -832,16 +832,16 @@ namespace Speedcar
 			if (Drivetrain == Drivetrain.FrontWheelDrive)
 			{
 				// 前輪のデフを通してトルクを伝達
-				float frontLeftRPM = Math.Abs(Suspension.FrontLeftWheelCollider.rpm);
-				float frontRightRPM = Mathf.Abs(Suspension.FrontRightWheelCollider.rpm);
+				float frontLeftRPM = Math.Abs(Chassis.FrontLeftWheelCollider.rpm);
+				float frontRightRPM = Mathf.Abs(Chassis.FrontRightWheelCollider.rpm);
 				float frontLeftOpenTorque = (frontLeftRPM + frontRightRPM > 1f) ? torque * frontLeftRPM / (frontLeftRPM + frontRightRPM) : torque / 2f;
 				float frontRightOpenTorque = (frontLeftRPM + frontRightRPM > 1f) ? torque * frontRightRPM / (frontLeftRPM + frontRightRPM) : torque / 2f;
 				float frontLeftLockedTorque = torque / 2f;
 				float frontRightLockedTorque = torque / 2f;
-				Suspension.FrontLeftWheelCollider.motorTorque = (Gear == -1 ? -1f : 1f) * Mathf.Lerp(frontLeftOpenTorque, frontLeftLockedTorque, FrontDifferentialLocking);
-				Suspension.FrontRightWheelCollider.motorTorque = (Gear == -1 ? -1f : 1f) * Mathf.Lerp(frontRightOpenTorque, frontRightLockedTorque, FrontDifferentialLocking);
+				Chassis.FrontLeftWheelCollider.motorTorque = (Gear == -1 ? -1f : 1f) * Mathf.Lerp(frontLeftOpenTorque, frontLeftLockedTorque, FrontDifferentialLocking);
+				Chassis.FrontRightWheelCollider.motorTorque = (Gear == -1 ? -1f : 1f) * Mathf.Lerp(frontRightOpenTorque, frontRightLockedTorque, FrontDifferentialLocking);
 				// 後輪に動力は伝わらない
-				foreach (var wheelCollider in Suspension.RearWheelColliders)
+				foreach (var wheelCollider in Chassis.RearWheelColliders)
 				{
 					wheelCollider.motorTorque = 0f;
 				}
@@ -850,16 +850,16 @@ namespace Speedcar
 			else if (Drivetrain == Drivetrain.RearWheelDrive)
 			{
 				// 後輪のデフを通してトルクを伝達
-				float rearLeftRPM = Math.Abs(Suspension.RearLeftWheelCollider.rpm);
-				float rearRightRPM = Mathf.Abs(Suspension.RearRightWheelCollider.rpm);
+				float rearLeftRPM = Math.Abs(Chassis.RearLeftWheelCollider.rpm);
+				float rearRightRPM = Mathf.Abs(Chassis.RearRightWheelCollider.rpm);
 				float rearLeftOpenTorque = (rearLeftRPM + rearRightRPM > 1f) ? torque * rearLeftRPM / (rearLeftRPM + rearRightRPM) : torque / 2f;
 				float rearRightOpenTorque = (rearLeftRPM + rearRightRPM > 1f) ? torque * rearRightRPM / (rearLeftRPM + rearRightRPM) : torque / 2f;
 				float rearLeftLockedTorque = torque / 2f;
 				float rearRightLockedTorque = torque / 2f;
-				Suspension.RearLeftWheelCollider.motorTorque = (Gear == -1 ? -1f : 1f) * Mathf.Lerp(rearLeftOpenTorque, rearLeftLockedTorque, RearDifferentialLocking);
-				Suspension.RearRightWheelCollider.motorTorque = (Gear == -1 ? -1f : 1f) * Mathf.Lerp(rearRightOpenTorque, rearRightLockedTorque, RearDifferentialLocking);
+				Chassis.RearLeftWheelCollider.motorTorque = (Gear == -1 ? -1f : 1f) * Mathf.Lerp(rearLeftOpenTorque, rearLeftLockedTorque, RearDifferentialLocking);
+				Chassis.RearRightWheelCollider.motorTorque = (Gear == -1 ? -1f : 1f) * Mathf.Lerp(rearRightOpenTorque, rearRightLockedTorque, RearDifferentialLocking);
 				// 前輪に動力は伝わらない
-				foreach (var wheelCollider in Suspension.FrontWheelColliders)
+				foreach (var wheelCollider in Chassis.FrontWheelColliders)
 				{
 					wheelCollider.motorTorque = 0f;
 				}
@@ -868,8 +868,8 @@ namespace Speedcar
 			else if (Drivetrain == Drivetrain.AllWheelDrive)
 			{
 				// センターデフの動作を再現
-				float frontRPM = Math.Abs(Suspension.FrontWheelColliders.Average(x => x.rpm));
-				float rearRPM = Math.Abs(Suspension.RearWheelColliders.Average(x => x.rpm));
+				float frontRPM = Math.Abs(Chassis.FrontWheelColliders.Average(x => x.rpm));
+				float rearRPM = Math.Abs(Chassis.RearWheelColliders.Average(x => x.rpm));
 				float frontOpenTorque = (frontRPM + rearRPM > 1f) ? torque * frontRPM / (frontRPM + rearRPM) : torque / 2f;
 				float rearOpenTorque = (frontRPM + rearRPM > 1f) ? torque * rearRPM / (frontRPM + rearRPM) : torque / 2f;
 				float frontLockedTorque = Mathf.Lerp(torque, 0f, CenterDifferentialBalance);
@@ -877,23 +877,23 @@ namespace Speedcar
 				float frontTorque = Mathf.Lerp(frontOpenTorque, frontLockedTorque, CenterDifferentialLocking);
 				float rearTorque = Mathf.Lerp(rearOpenTorque, rearLockedTorque, CenterDifferentialLocking);
 				// 前輪のデフを通してトルクを伝達
-				float frontLeftRPM = Math.Abs(Suspension.FrontLeftWheelCollider.rpm);
-				float frontRightRPM = Mathf.Abs(Suspension.FrontRightWheelCollider.rpm);
+				float frontLeftRPM = Math.Abs(Chassis.FrontLeftWheelCollider.rpm);
+				float frontRightRPM = Mathf.Abs(Chassis.FrontRightWheelCollider.rpm);
 				float frontLeftOpenTorque = (frontLeftRPM + frontRightRPM > 1f) ? frontTorque * frontLeftRPM / (frontLeftRPM + frontRightRPM) : frontTorque / 2f;
 				float frontRightOpenTorque = (frontLeftRPM + frontRightRPM > 1f) ? frontTorque * frontRightRPM / (frontLeftRPM + frontRightRPM) : frontTorque / 2f;
 				float frontLeftLockedTorque = frontTorque / 2f;
 				float frontRightLockedTorque = frontTorque / 2f;
-				Suspension.FrontLeftWheelCollider.motorTorque = (Gear == -1 ? -1f : 1f) * Mathf.Lerp(frontLeftOpenTorque, frontLeftLockedTorque, FrontDifferentialLocking);
-				Suspension.FrontRightWheelCollider.motorTorque = (Gear == -1 ? -1f : 1f) * Mathf.Lerp(frontRightOpenTorque, frontRightLockedTorque, FrontDifferentialLocking);
+				Chassis.FrontLeftWheelCollider.motorTorque = (Gear == -1 ? -1f : 1f) * Mathf.Lerp(frontLeftOpenTorque, frontLeftLockedTorque, FrontDifferentialLocking);
+				Chassis.FrontRightWheelCollider.motorTorque = (Gear == -1 ? -1f : 1f) * Mathf.Lerp(frontRightOpenTorque, frontRightLockedTorque, FrontDifferentialLocking);
 				// 後輪のデフを通してトルクを伝達
-				float rearLeftRPM = Math.Abs(Suspension.RearLeftWheelCollider.rpm);
-				float rearRightRPM = Mathf.Abs(Suspension.RearRightWheelCollider.rpm);
+				float rearLeftRPM = Math.Abs(Chassis.RearLeftWheelCollider.rpm);
+				float rearRightRPM = Mathf.Abs(Chassis.RearRightWheelCollider.rpm);
 				float rearLeftOpenTorque = (rearLeftRPM + rearRightRPM > 1f) ? rearTorque * rearLeftRPM / (rearLeftRPM + rearRightRPM) : rearTorque / 2f;
 				float rearRightOpenTorque = (rearLeftRPM + rearRightRPM > 1f) ? rearTorque * rearRightRPM / (rearLeftRPM + rearRightRPM) : rearTorque / 2f;
 				float rearLeftLockedTorque = rearTorque / 2f;
 				float rearRightLockedTorque = rearTorque / 2f;
-				Suspension.RearLeftWheelCollider.motorTorque = (Gear == -1 ? -1f : 1f) * Mathf.Lerp(rearLeftOpenTorque, rearLeftLockedTorque, RearDifferentialLocking);
-				Suspension.RearRightWheelCollider.motorTorque = (Gear == -1 ? -1f : 1f) * Mathf.Lerp(rearRightOpenTorque, rearRightLockedTorque, RearDifferentialLocking);
+				Chassis.RearLeftWheelCollider.motorTorque = (Gear == -1 ? -1f : 1f) * Mathf.Lerp(rearLeftOpenTorque, rearLeftLockedTorque, RearDifferentialLocking);
+				Chassis.RearRightWheelCollider.motorTorque = (Gear == -1 ? -1f : 1f) * Mathf.Lerp(rearRightOpenTorque, rearRightLockedTorque, RearDifferentialLocking);
 			}
 		}
 
@@ -916,29 +916,29 @@ namespace Speedcar
 				{
 					// 前輪駆動の場合
 					case Drivetrain.FrontWheelDrive:
-						foreach (var wheelCollider in Suspension.FrontWheelColliders)
+						foreach (var wheelCollider in Chassis.FrontWheelColliders)
 						{
 							wheelCollider.wheelDampingRate = totalDamping;
 						}
-						foreach (var wheelCollider in Suspension.RearWheelColliders)
+						foreach (var wheelCollider in Chassis.RearWheelColliders)
 						{
 							wheelCollider.wheelDampingRate = WheelDampingRate;
 						}
 						break;
 					// 後輪駆動の場合
 					case Drivetrain.RearWheelDrive:
-						foreach (var wheelCollider in Suspension.FrontWheelColliders)
+						foreach (var wheelCollider in Chassis.FrontWheelColliders)
 						{
 							wheelCollider.wheelDampingRate = WheelDampingRate;
 						}
-						foreach (var wheelCollider in Suspension.RearWheelColliders)
+						foreach (var wheelCollider in Chassis.RearWheelColliders)
 						{
 							wheelCollider.wheelDampingRate = totalDamping;
 						}
 						break;
 					// 四輪駆動の場合
 					case Drivetrain.AllWheelDrive:
-						foreach (var wheelCollider in Suspension.WheelColliders)
+						foreach (var wheelCollider in Chassis.WheelColliders)
 						{
 							wheelCollider.wheelDampingRate = totalDamping;
 						}
@@ -949,7 +949,7 @@ namespace Speedcar
 			else
 			{
 				// 素の減衰を適用
-				foreach (var wheelCollider in Suspension.WheelColliders)
+				foreach (var wheelCollider in Chassis.WheelColliders)
 				{
 					wheelCollider.wheelDampingRate = WheelDampingRate;
 				}

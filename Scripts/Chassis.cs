@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Speedcar
 {
 	[RequireComponent(typeof(Body), typeof(Rigidbody)), DisallowMultipleComponent]
-	public class Suspension : MonoBehaviour
+	public class Chassis : MonoBehaviour
 	{
 
 		[SerializeField]

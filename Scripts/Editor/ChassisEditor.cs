@@ -3,10 +3,10 @@ using UnityEditor;
 
 namespace Speedcar
 {
-	[CustomEditor(typeof(Suspension))]
-	public class SuspensionEditor : Editor
+	[CustomEditor(typeof(Chassis))]
+	public class ChassisEditor : Editor
 	{
-		public Suspension Suspension => (Suspension)target;
+		public Chassis Chassis => (Chassis)target;
 
 		/*
 		public override void OnInspectorGUI()

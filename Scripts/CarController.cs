@@ -6,7 +6,7 @@ namespace Speedcar
 	/// <summary>
 	/// 車両の入力インターフェイス
 	/// </summary>
-	[RequireComponent(typeof(Powertrain), typeof(Suspension), typeof(Body)), DisallowMultipleComponent]
+	[RequireComponent(typeof(Powertrain), typeof(Chassis), typeof(Body)), DisallowMultipleComponent]
 	public class CarController : MonoBehaviour
 	{
 		/// <summary>
@@ -368,7 +368,7 @@ namespace Speedcar
 		/// <summary>
 		/// 足回りのコンポーネント
 		/// </summary>
-		private Suspension Suspension { get; set; }
+		private Chassis Chassis { get; set; }
 
 		/// <summary>
 		/// 剛体コンポーネント
@@ -382,7 +382,7 @@ namespace Speedcar
 		{
 			Body = GetComponent<Body>();
 			Powertrain = GetComponent<Powertrain>();
-			Suspension = GetComponent<Suspension>();
+			Chassis = GetComponent<Chassis>();
 			Rigidbody = GetComponent<Rigidbody>();
 		}
 
@@ -398,9 +398,9 @@ namespace Speedcar
 			// 各コンポーネントに入力を伝達
 			Powertrain.Throttle = AdjustedGas;
 			Powertrain.Gear = Mathf.Min(Gear, Powertrain.TopGear);
-			Suspension.Brake = AdjustedBrake;
-			Suspension.HandBrake = HandBrake;
-			Suspension.SteerRate = AdjustedSteerRate;
+			Chassis.Brake = AdjustedBrake;
+			Chassis.HandBrake = HandBrake;
+			Chassis.SteerRate = AdjustedSteerRate;
 		}
 
 		/// <summary>
@@ -412,17 +412,17 @@ namespace Speedcar
 			if (UseTractionControl)
 			{
 				// 駆動輪の接地情報を取得
-				var poweredWheelHits = Suspension.WheelHits;
-				if (Powertrain.Drivetrain == Drivetrain.FrontWheelDrive) poweredWheelHits = Suspension.FrontWheelHits;
-				if (Powertrain.Drivetrain == Drivetrain.RearWheelDrive) poweredWheelHits = Suspension.RearWheelHits;
+				var poweredWheelHits = Chassis.WheelHits;
+				if (Powertrain.Drivetrain == Drivetrain.FrontWheelDrive) poweredWheelHits = Chassis.FrontWheelHits;
+				if (Powertrain.Drivetrain == Drivetrain.RearWheelDrive) poweredWheelHits = Chassis.RearWheelHits;
 				// 加速による駆動輪のスリップを求める
 				var hits = poweredWheelHits.Where(h => h.HasValue);
 				float forwardSlip = hits.Any() ? hits.Average(h => h.Value.forwardSlip) : 0f;
 				float accelerationSlip = Mathf.Abs(forwardSlip);
 				// 駆動輪を取得
-				var poweredWheels = Suspension.WheelColliders;
-				if (Powertrain.Drivetrain == Drivetrain.FrontWheelDrive) poweredWheels = Suspension.FrontWheelColliders;
-				if (Powertrain.Drivetrain == Drivetrain.RearWheelDrive) poweredWheels = Suspension.RearWheelColliders;
+				var poweredWheels = Chassis.WheelColliders;
+				if (Powertrain.Drivetrain == Drivetrain.FrontWheelDrive) poweredWheels = Chassis.FrontWheelColliders;
+				if (Powertrain.Drivetrain == Drivetrain.RearWheelDrive) poweredWheels = Chassis.RearWheelColliders;
 				// 目標スリップを求める
 				float forwardExtremumSlip = poweredWheels.Average(w => w.forwardFriction.extremumSlip);
 				float targetSlip = forwardExtremumSlip * (1f - TractionControlSlipMargin);
@@ -473,10 +473,10 @@ namespace Speedcar
 			if (UseAntiLockBrake)
 			{
 				// ブレーキングによるスリップを求める
-				var hits = Suspension.WheelHits.Where(h => h.HasValue);
+				var hits = Chassis.WheelHits.Where(h => h.HasValue);
 				float brakingSlip = Mathf.Abs(hits.Any() ? hits.Average(h => h.Value.forwardSlip) : 0f);
 				// 目標スリップを求める
-				float forwardExtremumSlip = Suspension.WheelColliders.Average(w => w.forwardFriction.extremumSlip);
+				float forwardExtremumSlip = Chassis.WheelColliders.Average(w => w.forwardFriction.extremumSlip);
 				float targetSlip = forwardExtremumSlip * (1f - AntiLockBrakeSlipMargin);
 				// ABSを適用した場合の補正値を求める
 				float absBrake = AdjustedBrake * (1f - AntiLockBrakeEpsilon);
