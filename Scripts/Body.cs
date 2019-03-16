@@ -30,7 +30,7 @@ namespace Speedcar
 		/// 主慣性モーメントのバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private Vector3 inertiaTensor = new Vector3(2500f, 2000f, 1500f);
+		private Vector3 inertiaTensor = new Vector3(2250f, 2500f, 2000f);
 
 		/// <summary>
 		/// 慣性主軸の回転のバッキングフィールド
