@@ -53,6 +53,23 @@ namespace Speedcar.EditorOnly
 			DecreaseIndent();
 			// 更新する
 			serializedObject.ApplyModifiedProperties();
+			// プロパティを通して値を検査する
+			Body.CenterOfMassConfig = Body.CenterOfMassConfig;
+			Body.CenterOfMassOffset = Body.CenterOfMassOffset;
+			Body.CenterOfMassTransform = Body.CenterOfMassTransform;
+			Body.InertiaTensor = Body.InertiaTensor;
+			Body.InertiaTensorRotation = Body.InertiaTensorRotation;
+			Body.GravityMultiplier = Body.GravityMultiplier;
+			Body.MaxAngularSpeed = Body.MaxAngularSpeed;
+			Body.SolverIterations = Body.SolverIterations;
+			Body.SolverVelocityIterations = Body.SolverVelocityIterations;
+			Body.LinearDrag = Body.LinearDrag;
+			Body.QuadraticDrag = Body.QuadraticDrag;
+			Body.DownforceCoefficient = Body.DownforceCoefficient;
+			Body.DownforceShift = Body.DownforceShift;
+			Body.MaxDownforce = Body.MaxDownforce;
+			Body.MaxDepenetrationSpeed = Body.MaxDepenetrationSpeed;
+			Body.MaxAngularVelocityDeltaOnCollision = Body.MaxAngularVelocityDeltaOnCollision;
 		}
 	}
 }
