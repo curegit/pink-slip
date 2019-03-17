@@ -53,15 +53,19 @@ namespace Speedcar.EditorOnly
 			PropertyField("hasForcedInduction", "Forced Induction");
 			if (Powertrain.HasForcedInduction)
 			{
+				IncreaseIndent();
 				PropertyField("forcedInductionDevice", "Device");
 				PropertyField("maxForcedInductionEfficiency", "Efficiency");
 				PropertyField("maxAdditionalForcedPressure", "Additional Pressure");
 				PropertyField("forcedPressureMaxDeltaRate", "Pressure Max Delta Rate");
+				DecreaseIndent();
 			}
 			PropertyField("hasNitrous", "Nitrous");
 			if (Powertrain.HasNitrous)
 			{
+				IncreaseIndent();
 				PropertyField("nitrousEfficiency");
+				DecreaseIndent();
 			}
 			DecreaseIndent();
 			// 変速機について
