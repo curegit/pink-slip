@@ -6,7 +6,7 @@ namespace Speedcar
 	/// <summary>
 	/// 車両の入力インターフェイス
 	/// </summary>
-	[RequireComponent(typeof(Powertrain), typeof(Chassis), typeof(Body)), DisallowMultipleComponent]
+	[RequireComponent(typeof(Powertrain), typeof(Chassis)), RequireComponent(typeof(Body), typeof(Rigidbody)), DisallowMultipleComponent]
 	public class CarController : MonoBehaviour
 	{
 		/// <summary>
