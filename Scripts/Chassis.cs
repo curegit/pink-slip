@@ -608,6 +608,7 @@ namespace Speedcar
 		{
 			AdjustSprings();
 			AdjustDampers();
+			FixTargetPositions();
 			AdjustForcePoints();
 			ConfigureSuspensionDistance();
 			ConfigureSubsteps();
@@ -803,6 +804,16 @@ namespace Speedcar
 			{
 				var suspension = wheelCollider.suspensionSpring;
 				suspension.damper = 2f * DampingRatio * Mathf.Sqrt(wheelCollider.sprungMass * suspension.spring);
+				wheelCollider.suspensionSpring = suspension;
+			}
+		}
+
+		private void FixTargetPositions()
+		{
+			foreach (var wheelCollider in WheelColliders)
+			{
+				var suspension = wheelCollider.suspensionSpring;
+				suspension.targetPosition = 0.5f;
 				wheelCollider.suspensionSpring = suspension;
 			}
 		}
