@@ -24,10 +24,10 @@ namespace Speedcar
 
 
 		[SerializeField]
-		private float naturalFrequency = 1.5f;
+		private float frontNaturalFrequency = 1.5f;
 
 		[SerializeField]
-		private float springRateBias = 0.45f;
+		private float rearNaturalFrequency = 1.5f;
 
 		[SerializeField]
 		private float dampingRatio = 0.95f;
@@ -191,15 +191,27 @@ namespace Speedcar
 			}
 		}
 
-		public float NaturalFrequency
+		public float FrontNaturalFrequency
 		{
 			get
 			{
-				return naturalFrequency;
+				return frontNaturalFrequency;
 			}
 			set
 			{
-				naturalFrequency = Mathf.Max(value, 0f);
+				frontNaturalFrequency = Mathf.Max(value, 0f);
+			}
+		}
+
+		public float RearNaturalFrequency
+		{
+			get
+			{
+				return rearNaturalFrequency;
+			}
+			set
+			{
+				rearNaturalFrequency = Mathf.Max(value, 0f);
 			}
 		}
 
@@ -212,18 +224,6 @@ namespace Speedcar
 			set
 			{
 				dampingRatio = Mathf.Max(value, 0f);
-			}
-		}
-
-		public float SpringRateBias
-		{
-			get
-			{
-				return springRateBias;
-			}
-			set
-			{
-				springRateBias = Mathf.Clamp01(value);
 			}
 		}
 
@@ -779,20 +779,20 @@ namespace Speedcar
 
 		private void AdjustSprings()
 		{
-			float naturalFrequencySquared = Mathf.Pow(NaturalFrequency, 2f);
+			//float naturalFrequencySquared = Mathf.Pow(NaturalFrequency, 2f);
 			//float rearNaturalFrequencySquared = Mathf.Pow(RearNaturalFrequency, 2f);
-			float biasedFrontNaturalFrequencySquared = Mathf.Lerp(2f * naturalFrequencySquared, 0f, SpringRateBias);
-			float biasedRearNaturalFrequencySquared = Mathf.Lerp(0f, 2f * naturalFrequencySquared, SpringRateBias);
+			//float biasedFrontNaturalFrequencySquared = Mathf.Lerp(2f * naturalFrequencySquared, 0f, SpringRateBias);
+			//float biasedRearNaturalFrequencySquared = Mathf.Lerp(0f, 2f * naturalFrequencySquared, SpringRateBias);
 			foreach (var wheelCollider in FrontWheelColliders)
 			{
 				var suspension = wheelCollider.suspensionSpring;
-				suspension.spring = wheelCollider.sprungMass * biasedFrontNaturalFrequencySquared * Mathf.Pow(2 * Mathf.PI, 2f);
+				suspension.spring = wheelCollider.sprungMass * Mathf.Pow(2 * Mathf.PI * FrontNaturalFrequency, 2f);
 				wheelCollider.suspensionSpring = suspension;
 			}
 			foreach (var wheelCollider in RearWheelColliders)
 			{
 				var suspension = wheelCollider.suspensionSpring;
-				suspension.spring = wheelCollider.sprungMass * biasedRearNaturalFrequencySquared * Mathf.Pow(2 * Mathf.PI, 2f);
+				suspension.spring = wheelCollider.sprungMass * Mathf.Pow(2 * Mathf.PI * RearNaturalFrequency, 2f);
 				wheelCollider.suspensionSpring = suspension;
 			}
 		}
