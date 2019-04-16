@@ -12,7 +12,7 @@ namespace Speedcar
 		/// 重心の設定方法のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private CenterOfMassConfig centerOfMassConfig = CenterOfMassConfig.Automatic;
+		private CenterOfMassConfig centerOfMassConfig = CenterOfMassConfig.Transform;
 
 		/// <summary>
 		/// 重心のオフセットのバッキングフィールド
@@ -30,43 +30,43 @@ namespace Speedcar
 		/// 主慣性モーメントのバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private Vector3 inertiaTensor = new Vector3(2250f, 2500f, 2000f);
+		private Vector3 inertiaTensor = new Vector3(2000f, 6000f, 1000f);
 
 		/// <summary>
 		/// 慣性主軸の回転のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private Vector3 inertiaTensorRotation = new Vector3(0.1f, 0f, 0f);
+		private Vector3 inertiaTensorRotation = new Vector3(0f, 0f, 0f);
 
 		/// <summary>
 		/// 重力を追加適用する係数のバッキングフィールド
 		/// </summary>
 		[SerializeField, Range(0.5f, 3f)]
-		private float gravityMultiplier = 1.2f;
+		private float gravityMultiplier = 1.4f;
 
 		/// <summary>
 		/// 速度に比例する空気抵抗の係数のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private Vector3 linearDrag = new Vector3(1.0f, 2.0f, 0.25f);
+		private Vector3 linearDrag = new Vector3(1.5f, 1.5f, 0.8f);
 
 		/// <summary>
 		/// 速度の二乗に比例する空気抵抗の係数のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private Vector3 quadraticDrag = new Vector3(3.0f, 4.0f, 0.5f);
+		private Vector3 quadraticDrag = new Vector3(3.5f, 4.5f, 0.5f);
 
 		/// <summary>
 		/// ダウンフォースの比例係数のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float downforceCoefficient = 1f;
+		private float downforceCoefficient = 1.1f;
 
 		/// <summary>
 		/// 重心から後ろへのダウンフォース作用点のずらしのバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float downforceShift = 0.1f;
+		private float downforceShift = 0.05f;
 
 		/// <summary>
 		/// ダウンフォースの上限のバッキングフィールド
@@ -78,7 +78,7 @@ namespace Speedcar
 		/// 角速度の大きさの上限のバッキングフィールド
 		/// </summary>
 		[SerializeField, Range(0.5f, 6.2f)]
-		private float maxAngularSpeed = 0.8f;
+		private float maxAngularSpeed = 0.75f;
 
 		/// <summary>
 		/// 接触時における角速度の変化の上限のバッキングフィールド
@@ -90,7 +90,7 @@ namespace Speedcar
 		/// 物理ソルバが貫通状態を解決するために導入できる最大の速度のバッキングフィールド
 		/// </summary>
 		[SerializeField, Range(10f, 50f)]
-		private float maxDepenetrationSpeed = 20f;
+		private float maxDepenetrationSpeed = 40f;
 
 		/// <summary>
 		/// 物理ソルバのイテレーション回数のバッキングフィールド
