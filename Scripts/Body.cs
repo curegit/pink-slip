@@ -476,12 +476,6 @@ namespace Speedcar
 				case CenterOfMassConfig.Default:
 					Rigidbody.ResetCenterOfMass();
 					break;
-				case CenterOfMassConfig.Automatic:
-					Rigidbody.ResetCenterOfMass();
-					var dir = Rigidbody.worldCenterOfMass - GetBodyBounds().center;
-					var center = Rigidbody.worldCenterOfMass + dir * Mathf.Sqrt(2f);
-					Rigidbody.centerOfMass = Vector3.Scale(transform.InverseTransformPoint(center), transform.lossyScale);
-					break;
 				case CenterOfMassConfig.Offset:
 					Rigidbody.ResetCenterOfMass();
 					Rigidbody.centerOfMass = Rigidbody.centerOfMass + CenterOfMassOffset;
@@ -490,21 +484,6 @@ namespace Speedcar
 					Rigidbody.centerOfMass = CenterOfMassTransform ? Vector3.Scale(transform.InverseTransformPoint(CenterOfMassTransform.position), transform.lossyScale) : Rigidbody.centerOfMass;
 					break;
 			}
-		}
-
-		/// <summary>
-		/// すべてのコライダーのAABBを返す
-		/// </summary>
-		/// <returns>AABB</returns>
-		private Bounds GetBodyBounds()
-		{
-			var colliders = GetComponentsInChildren<Collider>();
-			var bounds = new Bounds(transform.position, Vector3.zero);
-			foreach (var collider in colliders)
-			{
-				bounds.Encapsulate(collider.bounds);
-			}
-			return bounds;
 		}
 	}
 }
