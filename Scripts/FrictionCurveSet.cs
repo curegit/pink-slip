@@ -9,125 +9,201 @@ namespace Speedcar
 	[Serializable]
 	public class FrictionCurveSet
 	{
+		/// <summary>
+		/// 縦方向の極大スリップのバッキングフィールド
+		/// </summary>
 		[SerializeField]
-		private float frontForwardExtremumSlip;
+		private float forwardExtremumSlip;
 
+		/// <summary>
+		/// 縦方向の極大スリップの摩擦のバッキングフィールド
+		/// </summary>
 		[SerializeField]
-		private float frontForwardExtremumValue;
+		private float forwardExtremumValue;
 
+		/// <summary>
+		/// 縦方向の漸近スリップのバッキングフィールド
+		/// </summary>
 		[SerializeField]
-		private float frontForwardAsymptoteSlip;
+		private float forwardAsymptoteSlip;
 
+		/// <summary>
+		/// 縦方向の漸近スリップの摩擦のバッキングフィールド
+		/// </summary>
 		[SerializeField]
-		private float frontForwardAsymptoteValue;
+		private float forwardAsymptoteValue;
 
+		/// <summary>
+		/// 横方向の極大スリップのバッキングフィールド
+		/// </summary>
+		[SerializeField]
+		private float sidewaysExtremumSlip;
+
+		/// <summary>
+		/// 横方向の極大スリップの摩擦のバッキングフィールド
+		/// </summary>
+		[SerializeField]
+		private float sidewaysExtremumValue;
+
+		/// <summary>
+		/// 横方向の漸近スリップのバッキングフィールド
+		/// </summary>
+		[SerializeField]
+		private float sidewaysAsymptoteSlip;
+
+		/// <summary>
+		/// 横方向の漸近スリップの摩擦のバッキングフィールド
+		/// </summary>
+		[SerializeField]
+		private float sidewaysAsymptoteValue;
+
+		/// <summary>
+		/// 前輪の縦方向の剛性のバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private float frontForwardStiffness;
 
-
-		[SerializeField]
-		private float frontSidewayExtremumSlip;
-
-		[SerializeField]
-		private float frontSidewayExtremumValue;
-
-		[SerializeField]
-		private float frontSidewayAsymptoteSlip;
-
-		[SerializeField]
-		private float frontSidewayAsymptoteValue;
-
-		[SerializeField]
-		private float frontSidewayStiffness;
-
-
-
-		[SerializeField]
-		private float rearForwardExtremumSlip;
-
-		[SerializeField]
-		private float rearForwardExtremumValue;
-
-		[SerializeField]
-		private float rearForwardAsymptoteSlip;
-
-		[SerializeField]
-		private float rearForwardAsymptoteValue;
-
+		/// <summary>
+		/// 前輪の横方向の剛性のバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private float rearForwardStiffness;
 
-
+		/// <summary>
+		/// 後輪の縦方向の剛性のバッキングフィールド
+		/// </summary>
 		[SerializeField]
-		private float rearSidewayExtremumSlip;
+		private float frontSidewaysStiffness;
 
+		/// <summary>
+		/// 後輪の横方向の剛性のバッキングフィールド
+		/// </summary>
 		[SerializeField]
-		private float rearSidewayExtremumValue;
+		private float rearSidewaysStiffness;
 
-		[SerializeField]
-		private float rearSidewayAsymptoteSlip;
-
-		[SerializeField]
-		private float rearSidewayAsymptoteValue;
-
-		[SerializeField]
-		private float rearSidewayStiffness;
-
-
-
-
-
-
-
-
-		public float FrontForwardExtremumSlip
+		/// <summary>
+		/// 縦方向の極大スリップ
+		/// </summary>
+		public float ForwardExtremumSlip
 		{
 			get
 			{
-				return frontForwardExtremumSlip;
+				return forwardExtremumSlip;
 			}
 			set
 			{
-				frontForwardExtremumSlip = Mathf.Max(value, 0f);
+				forwardExtremumSlip = Mathf.Max(value, 0f);
 			}
 		}
 
-		public float FrontForwardExtremumValue
+		/// <summary>
+		/// 縦方向の極大スリップの摩擦
+		/// </summary>
+		public float ForwardExtremumValue
 		{
 			get
 			{
-				return frontForwardExtremumValue;
+				return forwardExtremumValue;
 			}
 			set
 			{
-				frontForwardExtremumValue = Mathf.Max(value, 0f);
+				forwardExtremumValue = Mathf.Max(value, 0f);
 			}
 		}
 
-		public float FrontForwardAsymptoteSlip
+		/// <summary>
+		/// 縦方向の漸近スリップ
+		/// </summary>
+		public float ForwardAsymptoteSlip
 		{
 			get
 			{
-				return frontForwardAsymptoteSlip;
+				return forwardAsymptoteSlip;
 			}
 			set
 			{
-				frontForwardAsymptoteSlip = Mathf.Max(value, 0f);
+				forwardAsymptoteSlip = Mathf.Max(value, 0f);
 			}
 		}
 
-		public float FrontForwardAsymptoteValue
+		/// <summary>
+		/// 縦方向の漸近スリップの摩擦
+		/// </summary>
+		public float ForwardAsymptoteValue
 		{
 			get
 			{
-				return frontForwardAsymptoteValue;
+				return forwardAsymptoteValue;
 			}
 			set
 			{
-				frontForwardAsymptoteValue = Mathf.Max(value, 0f);
+				forwardAsymptoteValue = Mathf.Max(value, 0f);
 			}
 		}
 
+		/// <summary>
+		/// 横方向の極大スリップ
+		/// </summary>
+		public float SidewaysExtremumSlip
+		{
+			get
+			{
+				return sidewaysExtremumSlip;
+			}
+			set
+			{
+				sidewaysExtremumSlip = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// 横方向の極大スリップの摩擦
+		/// </summary>
+		public float SidewaysExtremumValue
+		{
+			get
+			{
+				return sidewaysExtremumValue;
+			}
+			set
+			{
+				sidewaysExtremumValue = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// 横方向の漸近スリップ
+		/// </summary>
+		public float SidewaysAsymptoteSlip
+		{
+			get
+			{
+				return sidewaysAsymptoteSlip;
+			}
+			set
+			{
+				sidewaysAsymptoteSlip = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// 横方向の漸近スリップの摩擦
+		/// </summary>
+		public float SidewaysAsymptoteValue
+		{
+			get
+			{
+				return sidewaysAsymptoteValue;
+			}
+			set
+			{
+				sidewaysAsymptoteValue = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// 前輪の縦方向の剛性
+		/// </summary>
 		public float FrontForwardStiffness
 		{
 			get
@@ -140,122 +216,24 @@ namespace Speedcar
 			}
 		}
 
-
-
-
-
-
-		public float FrontSidewayExtremumSlip
+		/// <summary>
+		/// 前輪の横方向の剛性
+		/// </summary>
+		public float FrontSidewaysStiffness
 		{
 			get
 			{
-				return frontSidewayExtremumSlip;
+				return frontSidewaysStiffness;
 			}
 			set
 			{
-				frontSidewayExtremumSlip = Mathf.Max(value, 0f);
+				frontSidewaysStiffness = Mathf.Max(value, 0f);
 			}
 		}
 
-		public float FrontSidewayExtremumValue
-		{
-			get
-			{
-				return frontSidewayExtremumValue;
-			}
-			set
-			{
-				frontSidewayExtremumValue = Mathf.Max(value, 0f);
-			}
-		}
-
-		public float FrontSidewayAsymptoteSlip
-		{
-			get
-			{
-				return frontSidewayAsymptoteSlip;
-			}
-			set
-			{
-				frontSidewayAsymptoteSlip = Mathf.Max(value, 0f);
-			}
-		}
-
-		public float FrontSidewayAsymptoteValue
-		{
-			get
-			{
-				return frontSidewayAsymptoteValue;
-			}
-			set
-			{
-				frontSidewayAsymptoteValue = Mathf.Max(value, 0f);
-			}
-		}
-
-		public float FrontSidewayStiffness
-		{
-			get
-			{
-				return frontSidewayStiffness;
-			}
-			set
-			{
-				frontSidewayStiffness = Mathf.Max(value, 0f);
-			}
-		}
-
-
-
-
-		public float RearForwardExtremumSlip
-		{
-			get
-			{
-				return rearForwardExtremumSlip;
-			}
-			set
-			{
-				rearForwardExtremumSlip = Mathf.Max(value, 0f);
-			}
-		}
-
-		public float RearForwardExtremumValue
-		{
-			get
-			{
-				return rearForwardExtremumValue;
-			}
-			set
-			{
-				rearForwardExtremumValue = Mathf.Max(value, 0f);
-			}
-		}
-
-		public float RearForwardAsymptoteSlip
-		{
-			get
-			{
-				return rearForwardAsymptoteSlip;
-			}
-			set
-			{
-				rearForwardAsymptoteSlip = Mathf.Max(value, 0f);
-			}
-		}
-
-		public float RearForwardAsymptoteValue
-		{
-			get
-			{
-				return rearForwardAsymptoteValue;
-			}
-			set
-			{
-				rearForwardAsymptoteValue = Mathf.Max(value, 0f);
-			}
-		}
-
+		/// <summary>
+		/// 後輪の縦方向の剛性
+		/// </summary>
 		public float RearForwardStiffness
 		{
 			get
@@ -268,108 +246,67 @@ namespace Speedcar
 			}
 		}
 
-
-
-
-
-
-		public float RearSidewayExtremumSlip
+		/// <summary>
+		/// 後輪の横方向の剛性
+		/// </summary>
+		public float RearSidewaysStiffness
 		{
 			get
 			{
-				return rearSidewayExtremumSlip;
+				return rearSidewaysStiffness;
 			}
 			set
 			{
-				rearSidewayExtremumSlip = Mathf.Max(value, 0f);
+				rearSidewaysStiffness = Mathf.Max(value, 0f);
 			}
 		}
 
-		public float RearSidewayExtremumValue
-		{
-			get
-			{
-				return rearSidewayExtremumValue;
-			}
-			set
-			{
-				rearSidewayExtremumValue = Mathf.Max(value, 0f);
-			}
-		}
-
-		public float RearSidewayAsymptoteSlip
-		{
-			get
-			{
-				return rearSidewayAsymptoteSlip;
-			}
-			set
-			{
-				rearSidewayAsymptoteSlip = Mathf.Max(value, 0f);
-			}
-		}
-
-		public float RearSidewayAsymptoteValue
-		{
-			get
-			{
-				return rearSidewayAsymptoteValue;
-			}
-			set
-			{
-				rearSidewayAsymptoteValue = Mathf.Max(value, 0f);
-			}
-		}
-
-		public float RearSidewayStiffness
-		{
-			get
-			{
-				return rearSidewayStiffness;
-			}
-			set
-			{
-				rearSidewayStiffness = Mathf.Max(value, 0f);
-			}
-		}
-
-
-
-
+		/// <summary>
+		/// 前輪の縦方向の摩擦曲線を返す
+		/// </summary>
 		public WheelFrictionCurve FrontForwardFriction => new WheelFrictionCurve
 		{
-			extremumSlip = FrontForwardExtremumSlip,
-			extremumValue = FrontForwardExtremumValue,
-			asymptoteSlip = FrontForwardAsymptoteSlip,
-			asymptoteValue = FrontForwardAsymptoteValue,
+			extremumSlip = ForwardExtremumSlip,
+			extremumValue = ForwardExtremumValue,
+			asymptoteSlip = ForwardAsymptoteSlip,
+			asymptoteValue = ForwardAsymptoteValue,
 			stiffness = FrontForwardStiffness,
 		};
 
-		public WheelFrictionCurve FrontSidewayFriction => new WheelFrictionCurve
-		{
-			extremumSlip = FrontSidewayExtremumSlip,
-			extremumValue = FrontSidewayExtremumValue,
-			asymptoteSlip = FrontSidewayAsymptoteSlip,
-			asymptoteValue = FrontSidewayAsymptoteValue,
-			stiffness = FrontSidewayStiffness,
-		};
-
+		/// <summary>
+		/// 後輪の縦方向の摩擦曲線を返す
+		/// </summary>
 		public WheelFrictionCurve RearForwardFriction => new WheelFrictionCurve
 		{
-			extremumSlip = RearForwardExtremumSlip,
-			extremumValue = RearForwardExtremumValue,
-			asymptoteSlip = RearForwardAsymptoteSlip,
-			asymptoteValue = RearForwardAsymptoteValue,
+			extremumSlip = ForwardExtremumSlip,
+			extremumValue = ForwardExtremumValue,
+			asymptoteSlip = ForwardAsymptoteSlip,
+			asymptoteValue = ForwardAsymptoteValue,
 			stiffness = RearForwardStiffness,
 		};
 
-		public WheelFrictionCurve RearSidewayFriction => new WheelFrictionCurve
+		/// <summary>
+		/// 前輪の横方向の摩擦曲線を返す
+		/// </summary>
+		public WheelFrictionCurve FrontSidewaysFriction => new WheelFrictionCurve
 		{
-			extremumSlip = RearSidewayExtremumSlip,
-			extremumValue = RearSidewayExtremumValue,
-			asymptoteSlip = RearSidewayAsymptoteSlip,
-			asymptoteValue = RearSidewayAsymptoteValue,
-			stiffness = RearSidewayStiffness,
+			extremumSlip = SidewaysExtremumSlip,
+			extremumValue = SidewaysExtremumValue,
+			asymptoteSlip = SidewaysAsymptoteSlip,
+			asymptoteValue = SidewaysAsymptoteValue,
+			stiffness = FrontSidewaysStiffness,
+		};
+
+		/// <summary>
+		/// 後輪の横方向の摩擦曲線を返す
+		/// </summary>
+		public WheelFrictionCurve RearSidewaysFriction => new WheelFrictionCurve
+		{
+			extremumSlip = SidewaysExtremumSlip,
+			extremumValue = SidewaysExtremumValue,
+			asymptoteSlip = SidewaysAsymptoteSlip,
+			asymptoteValue = SidewaysAsymptoteValue,
+			stiffness = RearSidewaysStiffness,
 		};
 	}
 }
