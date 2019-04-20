@@ -1,119 +1,197 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Speedcar
 {
+	/// <summary>
+	/// 車両の足回り
+	/// </summary>
 	[RequireComponent(typeof(Body), typeof(Rigidbody)), DisallowMultipleComponent]
 	public class Chassis : MonoBehaviour
 	{
-
+		/// <summary>
+		/// 左前輪のホイールコライダーのバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private WheelCollider frontLeftWheelCollider;
 
+		/// <summary>
+		/// 右前輪のホイールコライダーのバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private WheelCollider frontRightWheelCollider;
 
+		/// <summary>
+		/// 左後輪のホイールコライダーのバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private WheelCollider rearLeftWheelCollider;
 
+		/// <summary>
+		/// 右後輪のホイールコライダーのバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private WheelCollider rearRightWheelCollider;
 
-
-
-
+		/// <summary>
+		/// 前輪のスプリングの固有振動数のバッキングフィールド
+		/// </summary>
 		[SerializeField]
-		private float frontNaturalFrequency = 1.5f;
+		private float frontNaturalFrequency = 1.9f;
 
+		/// <summary>
+		/// 後輪のスプリングの固有振動数のバッキングフィールド
+		/// </summary>
 		[SerializeField]
-		private float rearNaturalFrequency = 1.5f;
+		private float rearNaturalFrequency = 1.9f;
 
+		/// <summary>
+		/// サスペンションの減衰比のバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private float dampingRatio = 0.3f;
 
+		/// <summary>
+		/// 作用点を重心から鉛直下向きにどれだけずらすかのバッキングフィールド
+		/// </summary>
 		[SerializeField]
-		private float forceShift = 0.15f;
+		private float forceShift = 0.1f;
 
-
-
+		/// <summary>
+		/// サスペンション長を自動設定するかのバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private bool autoConfigureSuspensionDistance;
 
+		/// <summary>
+		/// 手動設定の前輪のサスペンション長のバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private float frontSuspensionDistance = 0.25f;
 
+		/// <summary>
+		/// 手動設定の前輪のサスペンション長のバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private float rearSuspensionDistance = 0.25f;
 
-
-
-
+		/// <summary>
+		/// ステアリングの最大舵角のバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private float maxSteerAngle = 30f;
 
+		/// <summary>
+		/// アッカーマンアングルの適用率のバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private float ackermannCoefficient = 1f;
 
+		/// <summary>
+		/// 前輪のトー角のバッキングフィールド
+		/// </summary>
 		[SerializeField]
-		private float frontToeAngle = 0.1f;
+		private float frontToeAngle = 0f;
 
+		/// <summary>
+		/// 後輪のトー角のバッキングフィールド
+		/// </summary>
 		[SerializeField]
-		private float rearToeAngle = 0f;
+		private float rearToeAngle = 0.1f;
 
-
-
+		/// <summary>
+		/// オーバーステアアシストの適用量のバッキングフィールド
+		/// </summary>
 		[SerializeField]
-		private float brakeTorque;
+		private float antiOversteer = 0.1f;
 
+		/// <summary>
+		/// ブレーキトルク量のバッキングフィールド
+		/// </summary>
+		[SerializeField]
+		private float brakeTorque = 2000f;
+
+		/// <summary>
+		/// 前後のブレーキバイアスのバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private float brakeBias = 0.5f;
 
+		/// <summary>
+		/// スプリングレートに対するスタビライザーの硬さのバッキングフィールド
+		/// </summary>
 		[SerializeField]
-		private float stabilizerCoefficient;
+		private float stabilizerCoefficient = 1.1f;
 
+		/// <summary>
+		/// 前後のスタビライザーの配分のバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private float stabilizerBias = 0.5f;
 
-
-
-
+		/// <summary>
+		/// 摩擦曲線の表現の集合のバッキングフィールド
+		/// </summary>
 		[SerializeField]
 		private FrictionCurveSet frictionCurveSet;
 
-		public float DriftOrGrip;
-
-		public float StiffnessMultiplier { get; set; }
-		public float BrakeBonusStiffness;
-		public float SteerDriftBonusStiffness;
-		public float NoSteerBonusStiffness;
-
+		/// <summary>
+		/// サブステップを変更する速度の閾値のバッキングフィールド
+		/// </summary>
 		[SerializeField]
-		private float antiOversteerCoefficient;
+		private float substepsSpeedThreshold = 10f;
 
-
+		/// <summary>
+		/// 閾値より上のサブステップのバッキングフィールド
+		/// </summary>
 		[SerializeField]
-		private float substepsSpeedThreshold = 25f;
+		private int substepsAboveThreshold = 50;
 
+		/// <summary>
+		/// 閾値より下のサブステップのバッキングフィールド
+		/// </summary>
 		[SerializeField]
-		private int substepsAboveThreshold = 8;
+		private int substepsBelowThreshold = 50;
 
-		[SerializeField]
-		private int substepsBelowThreshold = 4;
+		/// <summary>
+		/// 左前輪の剛性を定数倍するのバッキングフィールド
+		/// </summary>
+		private float frontLeftWheelStiffnessMultiplier = 1f;
 
+		/// <summary>
+		/// 右前輪の剛性を定数倍するのバッキングフィールド
+		/// </summary>
+		private float frontRightWheelStiffnessMultiplier = 1f;
 
+		/// <summary>
+		/// 左後輪の剛性を定数倍するのバッキングフィールド
+		/// </summary>
+		private float rearLeftWheelStiffnessMultiplier = 1f;
 
+		/// <summary>
+		/// 右後輪の剛性を定数倍するのバッキングフィールド
+		/// </summary>
+		private float rearRightWheelStiffnessMultiplier = 1f;
 
-
-
-
+		/// <summary>
+		/// ブレーキ入力率のバッキングフィールド
+		/// </summary>
 		private float brake;
 
+		/// <summary>
+		/// ハンドブレーキ入力率のバッキングフィールド
+		/// </summary>
 		private float handBrake;
 
+		/// <summary>
+		/// ステアリング入力率のバッキングフィールド
+		/// </summary>
 		private float steerRate;
 
-
+		/// <summary>
+		/// 左前輪のホイールコライダー
+		/// </summary>
 		public WheelCollider FrontLeftWheelCollider
 		{
 			get
@@ -126,6 +204,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 右前輪のホイールコライダー
+		/// </summary>
 		public WheelCollider FrontRightWheelCollider
 		{
 			get
@@ -138,6 +219,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 左後輪のホイールコライダー
+		/// </summary>
 		public WheelCollider RearLeftWheelCollider
 		{
 			get
@@ -150,6 +234,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 右後輪のホイールコライダー
+		/// </summary>
 		public WheelCollider RearRightWheelCollider
 		{
 			get
@@ -162,6 +249,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// すべてのホイールコライダーの反復子を返す
+		/// </summary>
 		public IEnumerable<WheelCollider> WheelColliders
 		{
 			get
@@ -173,6 +263,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 前輪のホイールコライダーの反復子を返す
+		/// </summary>
 		public IEnumerable<WheelCollider> FrontWheelColliders
 		{
 			get
@@ -182,6 +275,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 後輪のホイールコライダーの反復子を返す
+		/// </summary>
 		public IEnumerable<WheelCollider> RearWheelColliders
 		{
 			get
@@ -191,6 +287,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 前輪のスプリングの固有振動数
+		/// </summary>
 		public float FrontNaturalFrequency
 		{
 			get
@@ -203,6 +302,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 後輪のスプリングの固有振動数
+		/// </summary>
 		public float RearNaturalFrequency
 		{
 			get
@@ -215,6 +317,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// サスペンションの減衰比
+		/// </summary>
 		public float DampingRatio
 		{
 			get
@@ -227,6 +332,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 作用点を重心から鉛直下向きにどれだけずらすか
+		/// </summary>
 		public float ForceShift
 		{
 			get
@@ -239,6 +347,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// サスペンション長を自動設定するか
+		/// </summary>
 		public bool AutoConfigureSuspensionDistance
 		{
 			get
@@ -251,7 +362,9 @@ namespace Speedcar
 			}
 		}
 
-
+		/// <summary>
+		/// 手動設定の前輪のサスペンション長
+		/// </summary>
 		public float FrontSuspensionDistance
 		{
 			get
@@ -264,6 +377,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 手動設定の前輪のサスペンション長
+		/// </summary>
 		public float RearSuspensionDistance
 		{
 			get
@@ -276,7 +392,9 @@ namespace Speedcar
 			}
 		}
 
-
+		/// <summary>
+		/// ステアリングの最大舵角
+		/// </summary>
 		public float MaxSteerAngle
 		{
 			get
@@ -289,8 +407,9 @@ namespace Speedcar
 			}
 		}
 
-
-
+		/// <summary>
+		/// アッカーマンアングルの適用率（0=使用しない 1=完全なアッカーマンアングル）
+		/// </summary>
 		public float AckermannCoefficient
 		{
 			get
@@ -303,7 +422,9 @@ namespace Speedcar
 			}
 		}
 
-
+		/// <summary>
+		/// 前輪のトー角
+		/// </summary>
 		public float FrontToeAngle
 		{
 			get
@@ -316,6 +437,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 後輪のトー角
+		/// </summary>
 		public float RearToeAngle
 		{
 			get
@@ -328,19 +452,24 @@ namespace Speedcar
 			}
 		}
 
-
-		private float AntiOversteerCoefficient
+		/// <summary>
+		/// オーバーステアアシストの適用量
+		/// </summary>
+		private float AntiOversteer
 		{
 			get
 			{
-				return antiOversteerCoefficient;
+				return antiOversteer;
 			}
 			set
 			{
-				antiOversteerCoefficient = Mathf.Max(value, 0f);
+				antiOversteer = Mathf.Max(value, 0f);
 			}
 		}
 
+		/// <summary>
+		/// ブレーキトルク量
+		/// </summary>
 		public float BrakeTorque
 		{
 			get
@@ -353,6 +482,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 前後のブレーキバイアス
+		/// </summary>
 		public float BrakeBias
 		{
 			get
@@ -365,6 +497,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// スプリングレートに対するスタビライザーの硬さ
+		/// </summary>
 		public float StabilizerCoefficient
 		{
 			get
@@ -377,7 +512,9 @@ namespace Speedcar
 			}
 		}
 
-
+		/// <summary>
+		/// 前後のスタビライザーの配分
+		/// </summary>
 		public float StabilizerBias
 		{
 			get
@@ -390,9 +527,9 @@ namespace Speedcar
 			}
 		}
 
-
-
-
+		/// <summary>
+		/// 摩擦曲線の表現の集合
+		/// </summary>
 		public FrictionCurveSet FrictionCurveSet
 		{
 			get
@@ -405,15 +542,9 @@ namespace Speedcar
 			}
 		}
 
-
-
-
-
-
-
-
-
-
+		/// <summary>
+		/// サブステップを変更する速度の閾値
+		/// </summary>
 		public float SubstepsSpeedThreshold
 		{
 			get
@@ -426,9 +557,9 @@ namespace Speedcar
 			}
 		}
 
-
-
-
+		/// <summary>
+		/// 閾値より上のサブステップ
+		/// </summary>
 		public int SubstepsAboveThreshold
 		{
 			get
@@ -441,8 +572,9 @@ namespace Speedcar
 			}
 		}
 
-
-
+		/// <summary>
+		/// 閾値より下のサブステップ
+		/// </summary>
 		public int SubstepsBelowThreshold
 		{
 			get
@@ -455,25 +587,29 @@ namespace Speedcar
 			}
 		}
 
-
-
-
-
-	
-
-
-
-
-
-
+		/// <summary>
+		/// 左前輪の接触情報
+		/// </summary>
 		public WheelHit? FrontLeftWheelHit { get; private set; }
 
+		/// <summary>
+		/// 右前輪の接触情報
+		/// </summary>
 		public WheelHit? FrontRightWheelHit { get; private set; }
 
+		/// <summary>
+		/// 左後輪の接触情報
+		/// </summary>
 		public WheelHit? RearLeftWheelHit { get; private set; }
 
+		/// <summary>
+		/// 右後輪の接触情報
+		/// </summary>
 		public WheelHit? RearRightWheelHit { get; private set; }
 
+		/// <summary>
+		/// すべてのホイールの接触情報の反復子を返す
+		/// </summary>
 		public IEnumerable<WheelHit?> WheelHits
 		{
 			get
@@ -485,6 +621,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 前輪の接触情報の反復子を返す
+		/// </summary>
 		public IEnumerable<WheelHit?> FrontWheelHits
 		{
 			get
@@ -494,6 +633,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 後輪の接触情報の反復子を返す
+		/// </summary>
 		public IEnumerable<WheelHit?> RearWheelHits
 		{
 			get
@@ -503,16 +645,69 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 左前輪の剛性を定数倍する（ランタイム用）
+		/// </summary>
+		public float FrontLeftWheelStiffnessMultiplier
+		{
+			get
+			{
+				return frontLeftWheelStiffnessMultiplier;
+			}
+			set
+			{
+				frontLeftWheelStiffnessMultiplier = Mathf.Max(value, 0f);
+			}
+		}
 
+		/// <summary>
+		/// 右前輪の剛性を定数倍する
+		/// </summary>
+		public float FrontRightWheelStiffnessMultiplier
+		{
+			get
+			{
+				return frontRightWheelStiffnessMultiplier;
+			}
+			set
+			{
+				frontRightWheelStiffnessMultiplier = Mathf.Max(value, 0f);
+			}
+		}
 
+		/// <summary>
+		/// 左後輪の剛性を定数倍する
+		/// </summary>
+		public float RearLeftWheelStiffnessMultiplier
+		{
+			get
+			{
+				return rearLeftWheelStiffnessMultiplier;
+			}
+			set
+			{
+				rearLeftWheelStiffnessMultiplier = Mathf.Max(value, 0f);
+			}
+		}
 
+		/// <summary>
+		/// 右後輪の剛性を定数倍する
+		/// </summary>
+		public float RearRightWheelStiffnessMultiplier
+		{
+			get
+			{
+				return rearRightWheelStiffnessMultiplier;
+			}
+			set
+			{
+				rearRightWheelStiffnessMultiplier = Mathf.Max(value, 0f);
+			}
+		}
 
-
-
-
-
-
-
+		/// <summary>
+		/// ブレーキ入力率（0=無効 1=完全）
+		/// </summary>
 		public float Brake
 		{
 			get
@@ -525,8 +720,9 @@ namespace Speedcar
 			}
 		}
 
-
-
+		/// <summary>
+		/// ハンドブレーキ入力率（0=無効 1=完全）
+		/// </summary>
 		public float HandBrake
 		{
 			get
@@ -539,6 +735,9 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// ステアリング入力率（-1=最左 0=中立 1=最右）
+		/// </summary>
 		public float SteerRate
 		{
 			get
@@ -551,36 +750,45 @@ namespace Speedcar
 			}
 		}
 
+		/// <summary>
+		/// 前輪のトレッド
+		/// </summary>
 		public float FrontTrack
 		{
 			get
 			{
-				Vector3 left = WheelPosition(FrontLeftWheelCollider);
-				Vector3 right = WheelPosition(FrontRightWheelCollider);
+				Vector3 left = WheelBasePosition(FrontLeftWheelCollider);
+				Vector3 right = WheelBasePosition(FrontRightWheelCollider);
 				Vector3 diff = Rigidbody.transform.InverseTransformDirection(left - right);
 				return Mathf.Sqrt(diff.x * diff.x + diff.z * diff.z);
 			}
 		}
 
+		/// <summary>
+		/// 後輪のトレッド
+		/// </summary>
 		public float RearTrack
 		{
 			get
 			{
-				Vector3 left = WheelPosition(RearLeftWheelCollider);
-				Vector3 right = WheelPosition(RearRightWheelCollider);
+				Vector3 left = WheelBasePosition(RearLeftWheelCollider);
+				Vector3 right = WheelBasePosition(RearRightWheelCollider);
 				Vector3 diff = Rigidbody.transform.InverseTransformDirection(left - right);
 				return Mathf.Sqrt(diff.x * diff.x + diff.z * diff.z);
 			}
 		}
 
+		/// <summary>
+		/// ホイールベース
+		/// </summary>
 		public float Wheelbase
 		{
 			get
 			{
-				Vector3 frontLeft = WheelPosition(FrontLeftWheelCollider);
-				Vector3 frontRight = WheelPosition(FrontRightWheelCollider);
-				Vector3 rearLeft = WheelPosition(RearLeftWheelCollider);
-				Vector3 rearRight = WheelPosition(RearRightWheelCollider);
+				Vector3 frontLeft = WheelBasePosition(FrontLeftWheelCollider);
+				Vector3 frontRight = WheelBasePosition(FrontRightWheelCollider);
+				Vector3 rearLeft = WheelBasePosition(RearLeftWheelCollider);
+				Vector3 rearRight = WheelBasePosition(RearRightWheelCollider);
 				Vector3 leftDiff = Rigidbody.transform.InverseTransformDirection(frontLeft - rearLeft);
 				Vector3 rightDiff = Rigidbody.transform.InverseTransformDirection(frontRight - rearRight);
 				float left = Mathf.Sqrt(leftDiff.y * leftDiff.y + leftDiff.z * leftDiff.z);
@@ -589,11 +797,14 @@ namespace Speedcar
 			}
 		}
 
-
+		/// <summary>
+		/// 車体コンポーネント
+		/// </summary>
 		private Body Body { get; set; }
 
-
-
+		/// <summary>
+		/// 剛体コンポーネント
+		/// </summary>
 		private Rigidbody Rigidbody { get; set; }
 
 		// Use this for initialization
@@ -678,18 +889,33 @@ namespace Speedcar
 
 		private void Stabilize()
 		{
+			// TODO
 			float frontLeftTravel = FrontLeftWheelHit == null ? 1.0f : (-(FrontLeftWheelCollider.transform.InverseTransformPoint(FrontLeftWheelHit.Value.point).y - FrontLeftWheelCollider.center.y) - FrontLeftWheelCollider.radius) / FrontLeftWheelCollider.suspensionDistance;
 			float frontRightTravel = FrontRightWheelHit == null ? 1.0f : (-(FrontRightWheelCollider.transform.InverseTransformPoint(FrontRightWheelHit.Value.point).y - FrontRightWheelCollider.center.y) - FrontRightWheelCollider.radius) / FrontRightWheelCollider.suspensionDistance;
 			float rearLeftTravel = RearLeftWheelHit == null ? 1.0f : (-(RearLeftWheelCollider.transform.InverseTransformPoint(RearLeftWheelHit.Value.point).y - RearLeftWheelCollider.center.y) - RearLeftWheelCollider.radius) / RearLeftWheelCollider.suspensionDistance;
 			float rearRightTravel = RearRightWheelHit == null ? 1.0f : (-(RearRightWheelCollider.transform.InverseTransformPoint(RearRightWheelHit.Value.point).y - RearRightWheelCollider.center.y) - RearRightWheelCollider.radius) / RearRightWheelCollider.suspensionDistance;
-			float frontCoefficient = Mathf.Lerp(2 * StabilizerCoefficient, 0f, StabilizerBias);
-			float rearCoefficient = Mathf.Lerp(0f, 2f * StabilizerCoefficient, StabilizerBias);
+			/*
+			float frontLeftTravel = FrontLeftWheelHit == null ? 1.0f : (-(FrontLeftWheelCollider.transform.InverseTransformPoint(FrontLeftWheelHit.Value.point).y - FrontLeftWheelCollider.center.y) - FrontLeftWheelCollider.radius) / FrontLeftWheelCollider.suspensionDistance;
+			float frontRightTravel = FrontRightWheelHit == null ? 1.0f : (-(FrontRightWheelCollider.transform.InverseTransformPoint(FrontRightWheelHit.Value.point).y - FrontRightWheelCollider.center.y) - FrontRightWheelCollider.radius) / FrontRightWheelCollider.suspensionDistance;
+			float rearLeftTravel = RearLeftWheelHit == null ? 1.0f : (-(RearLeftWheelCollider.transform.InverseTransformPoint(RearLeftWheelHit.Value.point).y - RearLeftWheelCollider.center.y) - RearLeftWheelCollider.radius) / RearLeftWheelCollider.suspensionDistance;
+			float rearRightTravel = RearRightWheelHit == null ? 1.0f : (-(RearRightWheelCollider.transform.InverseTransformPoint(RearRightWheelHit.Value.point).y - RearRightWheelCollider.center.y) - RearRightWheelCollider.radius) / RearRightWheelCollider.suspensionDistance;
+			*/
+			float stabilizerForce = StabilizerCoefficient * (FrontLeftWheelCollider.suspensionSpring.spring + RearLeftWheelCollider.suspensionSpring.spring) / 2f;
+			float frontCoefficient = Mathf.Lerp(2 * stabilizerForce, 0f, StabilizerBias);
+			float rearCoefficient = Mathf.Lerp(0f, 2f * stabilizerForce, StabilizerBias);
 			float frontAntiRollForce = (frontLeftTravel - frontRightTravel) * frontCoefficient;
 			float rearAntiRollForce = (rearLeftTravel - rearRightTravel) * rearCoefficient;
+			var upward = Rigidbody.rotation * Vector3.up;
+			if (FrontLeftWheelHit != null) Rigidbody.AddForceAtPosition(upward * -frontAntiRollForce, WheelBasePosition(FrontLeftWheelCollider));
+			if (FrontRightWheelHit != null) Rigidbody.AddForceAtPosition(upward * frontAntiRollForce, WheelBasePosition(FrontRightWheelCollider));
+			if (RearLeftWheelHit != null) Rigidbody.AddForceAtPosition(upward * -rearAntiRollForce, WheelBasePosition(RearLeftWheelCollider));
+			if (RearRightWheelHit != null) Rigidbody.AddForceAtPosition(upward * rearAntiRollForce, WheelBasePosition(RearRightWheelCollider));
+			/*
 			if (FrontLeftWheelHit != null) Rigidbody.AddForceAtPosition(FrontLeftWheelCollider.transform.up * -frontAntiRollForce, WheelPosition(FrontLeftWheelCollider));
 			if (FrontRightWheelHit != null) Rigidbody.AddForceAtPosition(FrontRightWheelCollider.transform.up * frontAntiRollForce, WheelPosition(FrontRightWheelCollider));
 			if (RearLeftWheelHit != null) Rigidbody.AddForceAtPosition(RearLeftWheelCollider.transform.up * -rearAntiRollForce, WheelPosition(RearLeftWheelCollider));
 			if (RearRightWheelHit != null) Rigidbody.AddForceAtPosition(RearRightWheelCollider.transform.up * rearAntiRollForce, WheelPosition(RearRightWheelCollider));
+			*/
 		}
 
 
@@ -703,34 +929,34 @@ namespace Speedcar
 		/// </summary>
 		private void UpdateFrictionCurve()
 		{
-
-			float brakeBonus = BrakeBonusStiffness * Brake;
-
-			foreach (var wheelCollider in FrontWheelColliders)
-			{
-				WheelFrictionCurve forward = FrictionCurveSet.FrontForwardFriction;
-				forward.stiffness = forward.stiffness + brakeBonus;
-				wheelCollider.forwardFriction = forward;
-
-
-				WheelFrictionCurve sideway = FrictionCurveSet.FrontSidewayFriction;
-				//sideway.stiffness = sideway.stiffness + Mathf.Abs(SteerRate) * SteerDriftBonusStiffness;
-				//sideway.stiffness = sideway.stiffness + brakeBonus;
-				wheelCollider.sidewaysFriction = sideway;
-			}
-			foreach (var wheelCollider in RearWheelColliders)
-			{
-				WheelFrictionCurve forward = FrictionCurveSet.RearForwardFriction;
-				forward.stiffness = forward.stiffness + brakeBonus;
-				wheelCollider.forwardFriction = forward;
-
-				WheelFrictionCurve sideway = FrictionCurveSet.RearSidewayFriction;
-				//sideway.stiffness = sideway.stiffness + Mathf.Abs(SteerRate) * SteerDriftBonusStiffness;
-				//sideway.stiffness = sideway.stiffness + brakeBonus;
-				wheelCollider.sidewaysFriction = sideway;
-			}
-
-
+			// 
+			var frontLeftForward = FrictionCurveSet.FrontForwardFriction;
+			var frontLeftSideways = FrictionCurveSet.FrontSidewaysFriction;
+			frontLeftForward.stiffness = frontLeftForward.stiffness * FrontLeftWheelStiffnessMultiplier;
+			frontLeftSideways.stiffness = frontLeftSideways.stiffness * FrontLeftWheelStiffnessMultiplier;
+			FrontLeftWheelCollider.forwardFriction = frontLeftForward;
+			FrontLeftWheelCollider.sidewaysFriction = frontLeftSideways;
+			// 
+			var frontRightForward = FrictionCurveSet.FrontForwardFriction;
+			var frontRightSideways = FrictionCurveSet.FrontSidewaysFriction;
+			frontRightForward.stiffness = frontRightForward.stiffness * FrontRightWheelStiffnessMultiplier;
+			frontRightSideways.stiffness = frontRightSideways.stiffness * FrontRightWheelStiffnessMultiplier;
+			FrontRightWheelCollider.forwardFriction = frontRightForward;
+			FrontRightWheelCollider.sidewaysFriction = frontRightSideways;
+			// 
+			var rearLeftForward = FrictionCurveSet.RearForwardFriction;
+			var rearLeftSideways = FrictionCurveSet.RearSidewaysFriction;
+			rearLeftForward.stiffness = rearLeftForward.stiffness * RearLeftWheelStiffnessMultiplier;
+			rearLeftSideways.stiffness = rearLeftSideways.stiffness * RearLeftWheelStiffnessMultiplier;
+			RearLeftWheelCollider.forwardFriction = rearLeftForward;
+			RearLeftWheelCollider.sidewaysFriction = rearLeftSideways;
+			// 
+			var rearRightForward = FrictionCurveSet.RearForwardFriction;
+			var rearRightSideways = FrictionCurveSet.RearSidewaysFriction;
+			rearRightForward.stiffness = rearRightForward.stiffness * RearRightWheelStiffnessMultiplier;
+			rearRightSideways.stiffness = rearRightSideways.stiffness * RearRightWheelStiffnessMultiplier;
+			RearRightWheelCollider.forwardFriction = rearRightForward;
+			RearRightWheelCollider.sidewaysFriction = rearRightSideways;
 			// 要確認
 			var driveDirection = transform.forward;
 			var velocityDirection = (Rigidbody.velocity - transform.up * Vector3.Dot(Rigidbody.velocity, transform.up)).normalized;
@@ -823,7 +1049,7 @@ namespace Speedcar
 			foreach (var wheelCollider in WheelColliders)
 			{
 				float mass = Rigidbody.transform.InverseTransformPoint(Rigidbody.worldCenterOfMass).y;
-				float wheel = Rigidbody.transform.InverseTransformPoint(WheelPosition(wheelCollider)).y;
+				float wheel = Rigidbody.transform.InverseTransformPoint(WheelBasePosition(wheelCollider)).y;
 				float wheelToMass = (mass - wheel) * Rigidbody.transform.lossyScale.y / wheelCollider.transform.lossyScale.y;
 				float centerOfMassDistance = wheelToMass + wheelCollider.radius;
 				float shift = ForceShift / wheelCollider.transform.lossyScale.y;
@@ -884,7 +1110,15 @@ namespace Speedcar
 			return Mathf.Atan(1 / (axleTrack / Wheelbase + 1 / Mathf.Tan(innerAngle * Mathf.Deg2Rad))) * Mathf.Rad2Deg;
 		}
 
+
+
 		private Vector3 WheelPosition(WheelCollider wheelCollider)
+		{
+			wheelCollider.GetWorldPose(out var position, out var rotation);
+			return position;
+		}
+
+		private Vector3 WheelBasePosition(WheelCollider wheelCollider)
 		{
 			return wheelCollider.transform.TransformPoint(wheelCollider.center);
 		}
