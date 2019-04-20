@@ -30,7 +30,7 @@ namespace Speedcar
 		private float rearNaturalFrequency = 1.5f;
 
 		[SerializeField]
-		private float dampingRatio = 0.95f;
+		private float dampingRatio = 0.3f;
 
 		[SerializeField]
 		private float forceShift = 0.15f;
