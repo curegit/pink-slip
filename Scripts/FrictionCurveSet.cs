@@ -13,73 +13,73 @@ namespace Speedcar
 		/// 縦方向の極大スリップのバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float forwardExtremumSlip;
+		private float forwardExtremumSlip = 1.0f;
 
 		/// <summary>
 		/// 縦方向の極大スリップの摩擦のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float forwardExtremumValue;
+		private float forwardExtremumValue = 8.4f;
 
 		/// <summary>
 		/// 縦方向の漸近スリップのバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float forwardAsymptoteSlip;
+		private float forwardAsymptoteSlip = 2.0f;
 
 		/// <summary>
 		/// 縦方向の漸近スリップの摩擦のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float forwardAsymptoteValue;
+		private float forwardAsymptoteValue = 7.2f;
 
 		/// <summary>
 		/// 横方向の極大スリップのバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float sidewaysExtremumSlip;
+		private float sidewaysExtremumSlip = 1.0f;
 
 		/// <summary>
 		/// 横方向の極大スリップの摩擦のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float sidewaysExtremumValue;
+		private float sidewaysExtremumValue = 7.0f;
 
 		/// <summary>
 		/// 横方向の漸近スリップのバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float sidewaysAsymptoteSlip;
+		private float sidewaysAsymptoteSlip = 2.0f;
 
 		/// <summary>
 		/// 横方向の漸近スリップの摩擦のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float sidewaysAsymptoteValue;
+		private float sidewaysAsymptoteValue = 6.0f;
 
 		/// <summary>
 		/// 前輪の縦方向の剛性のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float frontForwardStiffness;
+		private float frontForwardStiffness = 1.0f;
 
 		/// <summary>
 		/// 前輪の横方向の剛性のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float rearForwardStiffness;
+		private float rearForwardStiffness = 1.0f;
 
 		/// <summary>
 		/// 後輪の縦方向の剛性のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float frontSidewaysStiffness;
+		private float frontSidewaysStiffness = 1.0f;
 
 		/// <summary>
 		/// 後輪の横方向の剛性のバッキングフィールド
 		/// </summary>
 		[SerializeField]
-		private float rearSidewaysStiffness;
+		private float rearSidewaysStiffness = 1.0f;
 
 		/// <summary>
 		/// 縦方向の極大スリップ
