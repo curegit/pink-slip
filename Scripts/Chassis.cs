@@ -119,6 +119,12 @@ namespace Speedcar
 		private float brakeBias = 0.5f;
 
 		/// <summary>
+		/// ハンドブレーキトルク量のバッキングフィールド
+		/// </summary>
+		[SerializeField]
+		private float handBrakeTorque = 300f;
+
+		/// <summary>
 		/// スプリングレートに対するスタビライザーの硬さのバッキングフィールド
 		/// </summary>
 		[SerializeField]
@@ -494,6 +500,21 @@ namespace Speedcar
 			set
 			{
 				brakeBias = Mathf.Clamp01(value);
+			}
+		}
+
+		/// <summary>
+		/// ハンドブレーキトルク量
+		/// </summary>
+		private float HandBrakeTorque
+		{
+			get
+			{
+				return handBrakeTorque;
+			}
+			set
+			{
+				handBrakeTorque = Mathf.Max(value, 0f);
 			}
 		}
 
@@ -874,9 +895,9 @@ namespace Speedcar
 		{
 			float frontBrakeTorque = Brake * Mathf.Lerp(BrakeTorque * 2f, 0f, BrakeBias);
 			float rearBrakeTorque = Brake * Mathf.Lerp(0f, BrakeTorque * 2f, BrakeBias);
-			// TODO ハンドブレーキ
+			float handBrakeTorque = HandBrake * HandBrakeTorque;
 			float totalFrontBrakeTorque = frontBrakeTorque;
-			float totalRearBrakeTorque = rearBrakeTorque;
+			float totalRearBrakeTorque = rearBrakeTorque + handBrakeTorque;
 			foreach (var wheelCollider in FrontWheelColliders)
 			{
 				wheelCollider.brakeTorque = totalFrontBrakeTorque;
