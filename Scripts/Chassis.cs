@@ -1074,30 +1074,26 @@ namespace Speedcar
 				float wheelToMass = (mass - wheel) * Rigidbody.transform.lossyScale.y / wheelCollider.transform.lossyScale.y;
 				float centerOfMassDistance = wheelToMass + wheelCollider.radius;
 				float shift = ForceShift / wheelCollider.transform.lossyScale.y;
-				wheelCollider.forceAppPointDistance = centerOfMassDistance - shift;
+				wheelCollider.forceAppPointDistance = Mathf.Clamp(centerOfMassDistance - shift, 0f, wheelCollider.radius * 2f);
 			}
 		}
 
 		/// <summary>
-		/// 
+		/// サスペンション長を設定する
 		/// </summary>
 		private void ConfigureSuspensionDistance()
 		{
-			// 
+			// サスペンション長を自動で設定する
 			if (AutoConfigureSuspensionDistance)
 			{
-				// 
 				float gravity = Mathf.Abs(Physics.gravity.y * Body.GravityMultiplier);
-				// 
 				foreach (var wheelCollider in WheelColliders)
 				{
-					//
 					float distance = wheelCollider.sprungMass * gravity / (0.5f * wheelCollider.suspensionSpring.spring);
-					// 
 					wheelCollider.suspensionDistance = distance / wheelCollider.transform.lossyScale.y;
 				}
 			}
-			// 
+			// サスペンション長を手動で設定する
 			else
 			{
 				foreach (var wheelCollider in FrontWheelColliders)
@@ -1112,7 +1108,7 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 
+		/// サブステップを設定する
 		/// </summary>
 		private void ConfigureSubsteps()
 		{
@@ -1121,10 +1117,10 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 
+		/// 内側のホイール角度からアッカーマンアングルを計算して返す
 		/// </summary>
-		/// <param name="innerAngle"></param>
-		/// <returns></returns>
+		/// <param name="innerAngle">旋回時の内側ホイールの角度の大きさ</param>
+		/// <returns>旋回時の外側ホイールの角度の大きさ</returns>
 		private float Ackermann(float innerAngle)
 		{
 			float axleTrack = (FrontTrack + RearTrack) / 2f;
@@ -1132,21 +1128,10 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 
+		/// ホイールの中心ワールド座標を返す（スプリングが最も縮んでいるときのホイールの中心に等しい）
 		/// </summary>
-		/// <param name="wheelCollider"></param>
-		/// <returns></returns>
-		//private Vector3 WheelPosition(WheelCollider wheelCollider)
-		//{
-		//	wheelCollider.GetWorldPose(out var position, out var rotation);
-		//	return position;
-		//}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="wheelCollider"></param>
-		/// <returns></returns>
+		/// <param name="wheelCollider">ホイールコライダー</param>
+		/// <returns>ホイールの中心ワールド座標</returns>
 		private Vector3 WheelBasePosition(WheelCollider wheelCollider)
 		{
 			return wheelCollider.transform.TransformPoint(wheelCollider.center);
