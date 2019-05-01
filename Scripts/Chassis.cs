@@ -53,6 +53,12 @@ namespace Speedcar
 		private float dampingRatio = 0.3f;
 
 		/// <summary>
+		/// サスペンションが到達しようとする伸縮度のバッキングフィールド
+		/// </summary>
+		[SerializeField]
+		private float targetPosition = 0.5f;
+
+		/// <summary>
 		/// 作用点を重心から鉛直下向きにどれだけずらすかのバッキングフィールド
 		/// </summary>
 		[SerializeField]
@@ -335,6 +341,21 @@ namespace Speedcar
 			set
 			{
 				dampingRatio = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// サスペンションが到達しようとする伸縮度（重力の追加適用が大きいと誤差が増える）
+		/// </summary>
+		public float TargetPosition
+		{
+			get
+			{
+				return targetPosition;
+			}
+			set
+			{
+				targetPosition = Mathf.Clamp01(value);
 			}
 		}
 
@@ -1060,7 +1081,7 @@ namespace Speedcar
 			foreach (var wheelCollider in WheelColliders)
 			{
 				var suspension = wheelCollider.suspensionSpring;
-				suspension.targetPosition = 0.5f;
+				suspension.targetPosition = TargetPosition;
 				wheelCollider.suspensionSpring = suspension;
 			}
 		}
