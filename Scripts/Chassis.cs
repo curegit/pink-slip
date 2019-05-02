@@ -481,7 +481,7 @@ namespace Speedcar
 		/// <summary>
 		/// オーバーステアアシストの適用量
 		/// </summary>
-		private float AntiOversteer
+		public float AntiOversteer
 		{
 			get
 			{
@@ -526,7 +526,7 @@ namespace Speedcar
 		/// <summary>
 		/// ハンドブレーキトルク量
 		/// </summary>
-		private float HandBrakeTorque
+		public float HandBrakeTorque
 		{
 			get
 			{
