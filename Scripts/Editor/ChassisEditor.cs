@@ -21,11 +21,18 @@ namespace Speedcar.EditorOnly
 			// 同期する
 			serializedObject.Update();
 			// ホイールコライダーについて
+			Space();
+			Header("Wheel Colliders");
+			IncreaseIndent();
 			PropertyField("frontLeftWheelCollider");
 			PropertyField("frontRightWheelCollider");
 			PropertyField("rearLeftWheelCollider");
 			PropertyField("rearRightWheelCollider");
+			DecreaseIndent();
 			// サスペンションについて
+			Space();
+			Header("Suspension");
+			IncreaseIndent();
 			PropertyField("frontNaturalFrequency");
 			PropertyField("rearNaturalFrequency");
 			PropertyField("dampingRatio");
@@ -37,25 +44,57 @@ namespace Speedcar.EditorOnly
 				PropertyField("frontSuspensionDistance");
 				PropertyField("rearSuspensionDistance");
 			}
+			DecreaseIndent();
 			// ステアリングとアライメントについて
+			Space();
+			Header("Steering & Alignment");
+			IncreaseIndent();
 			PropertyField("maxSteerAngle");
 			PropertyField("ackermannCoefficient");
 			PropertyField("frontToeAngle");
 			PropertyField("rearToeAngle");
 			PropertyField("antiOversteer");
+			DecreaseIndent();
 			// ブレーキについて
+			Space();
+			Header("Brakes");
+			IncreaseIndent();
 			PropertyField("brakeTorque");
 			PropertyField("brakeBias");
 			PropertyField("handBrakeTorque");
+			DecreaseIndent();
 			// スタビライザーについて
+			Space();
+			Header("Stabilizers");
+			IncreaseIndent();
 			PropertyField("stabilizerCoefficient");
 			PropertyField("stabilizerBias");
+			DecreaseIndent();
 			// タイヤについて
-			PropertyField("frictionCurveSet");
+			Space();
+			Header("Tires");
+			IncreaseIndent();
+			PropertyField("frictionCurveSet.forwardExtremumSlip");
+			PropertyField("frictionCurveSet.forwardExtremumValue");
+			PropertyField("frictionCurveSet.forwardAsymptoteSlip");
+			PropertyField("frictionCurveSet.forwardAsymptoteValue");
+			PropertyField("frictionCurveSet.sidewaysExtremumSlip");
+			PropertyField("frictionCurveSet.sidewaysExtremumValue");
+			PropertyField("frictionCurveSet.sidewaysAsymptoteSlip");
+			PropertyField("frictionCurveSet.sidewaysAsymptoteValue");
+			PropertyField("frictionCurveSet.frontForwardStiffness");
+			PropertyField("frictionCurveSet.rearForwardStiffness");
+			PropertyField("frictionCurveSet.frontSidewaysStiffness");
+			PropertyField("frictionCurveSet.rearSidewaysStiffness");
+			DecreaseIndent();
 			// サブステップについて
+			Space();
+			Header("Substepping");
+			IncreaseIndent();
 			PropertyField("substepsSpeedThreshold");
 			PropertyField("substepsBelowThreshold");
 			PropertyField("substepsAboveThreshold");
+			DecreaseIndent();
 			// 更新する
 			serializedObject.ApplyModifiedProperties();
 			// プロパティを通して値を検査する
