@@ -18,19 +18,19 @@ namespace Speedcar
 		/// <summary>
 		/// ABSのよるブレーキの戻し率のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float antiLockBrakeEpsilon = 0.2f;
 
 		/// <summary>
 		/// 摩擦極大点のスリップに対してABSが目標とするスリップの割合のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float antiLockBrakeSlipMargin = 0.5f;
 
 		/// <summary>
 		/// ABS使用時のブレーキ踏み戻しの割合制限のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float antiLockBrakeMaxStepDelta = 0.6f;
 
 		/// <summary>
@@ -42,19 +42,19 @@ namespace Speedcar
 		/// <summary>
 		/// TCSのよるアクセルの戻し率のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float tractionControlEpsilon = 0.1f;
 
 		/// <summary>
 		/// 摩擦極大点のスリップに対してTCSが目標とするスリップの割合のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float tractionControlSlipMargin = 0.3f;
 
 		/// <summary>
 		/// TCS使用時のアクセル踏み戻しの割合制限のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float tractionControlMaxGasDelta = 0.4f;
 
 		/// <summary>
@@ -66,13 +66,13 @@ namespace Speedcar
 		/// <summary>
 		/// 最大制限時のステアリング範囲の割合のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float limitedMaxSteerRate = 0.2f;
 
 		/// <summary>
 		/// ステアリング範囲の制限が最大になる速さのバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float limitedSteerRateSpeed = 90f;
 
 		/// <summary>
