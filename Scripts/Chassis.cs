@@ -54,7 +54,7 @@ namespace Speedcar
 		/// <summary>
 		/// サスペンションが到達しようとする伸縮度のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float targetPosition = 0.5f;
 
 		/// <summary>
@@ -84,31 +84,31 @@ namespace Speedcar
 		/// <summary>
 		/// ステアリングの最大舵角のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 90f)]
 		private float maxSteerAngle = 30f;
 
 		/// <summary>
 		/// アッカーマンアングルの適用率のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float ackermannCoefficient = 1f;
 
 		/// <summary>
 		/// 前輪のトー角のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(-5f, 5f)]
 		private float frontToeAngle = 0f;
 
 		/// <summary>
 		/// 後輪のトー角のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(-5f, 5f)]
 		private float rearToeAngle = 0.1f;
 
 		/// <summary>
 		/// オーバーステアアシストの適用量のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float antiOversteer = 0.1f;
 
 		/// <summary>
@@ -120,7 +120,7 @@ namespace Speedcar
 		/// <summary>
 		/// 前後のブレーキバイアスのバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float brakeBias = 0.5f;
 
 		/// <summary>
@@ -132,13 +132,13 @@ namespace Speedcar
 		/// <summary>
 		/// スプリングレートに対するスタビライザーの硬さのバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 3f)]
 		private float stabilizerCoefficient = 1.1f;
 
 		/// <summary>
 		/// 前後のスタビライザーの配分のバッキングフィールド
 		/// </summary>
-		[SerializeField]
+		[SerializeField, Range(0f, 1f)]
 		private float stabilizerBias = 0.5f;
 
 		/// <summary>
