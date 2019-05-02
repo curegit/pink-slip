@@ -449,7 +449,7 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 前輪のトー角
+		/// 前輪のトー角（度）
 		/// </summary>
 		public float FrontToeAngle
 		{
@@ -464,7 +464,7 @@ namespace Speedcar
 		}
 
 		/// <summary>
-		/// 後輪のトー角
+		/// 後輪のトー角（度）
 		/// </summary>
 		public float RearToeAngle
 		{
