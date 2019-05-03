@@ -377,6 +377,11 @@ namespace Speedcar
 		private Vector3 AngularVelocity { get; set; }
 
 		/// <summary>
+		/// このフレームの車体の角加速度の大きさ
+		/// </summary>
+		public float AngularAcceleration { get; private set; }
+
+		/// <summary>
 		/// 車体の剛体コンポーネント
 		/// </summary>
 		private Rigidbody Rigidbody { get; set; }
@@ -426,6 +431,7 @@ namespace Speedcar
 			SidewayVelocity = Vector3.Dot(Rigidbody.velocity, Rigidbody.rotation * Vector3.right);
 			UpwardVelocity = Vector3.Dot(Rigidbody.velocity, Rigidbody.rotation * Vector3.up);
 			ForwardVelocity = Vector3.Dot(Rigidbody.velocity, Rigidbody.rotation * Vector3.forward);
+			AngularAcceleration = Vector3.Distance(AngularVelocity, Rigidbody.angularVelocity) / Time.fixedDeltaTime;
 			AngularVelocity = Rigidbody.angularVelocity;
 		}
 
