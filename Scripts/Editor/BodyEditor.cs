@@ -31,6 +31,7 @@ namespace Speedcar.EditorOnly
 			PropertyField("inertiaTensorRotation", "Principal Axes Of Inertia");
 			PropertyField("gravityMultiplier");
 			PropertyField("maxAngularSpeed");
+			PropertyField("maxAngularAcceleration");
 			PropertyField("solverIterations");
 			PropertyField("solverVelocityIterations");
 			DecreaseIndent();
@@ -61,6 +62,7 @@ namespace Speedcar.EditorOnly
 			Body.InertiaTensorRotation = Body.InertiaTensorRotation;
 			Body.GravityMultiplier = Body.GravityMultiplier;
 			Body.MaxAngularSpeed = Body.MaxAngularSpeed;
+			Body.MaxAngularAcceleration = Body.MaxAngularAcceleration;
 			Body.SolverIterations = Body.SolverIterations;
 			Body.SolverVelocityIterations = Body.SolverVelocityIterations;
 			Body.LinearDrag = Body.LinearDrag;

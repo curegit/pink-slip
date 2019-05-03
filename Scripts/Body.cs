@@ -87,6 +87,12 @@ namespace Speedcar
 		private float maxAngularVelocityDeltaOnCollision = 0.1f;
 
 		/// <summary>
+		/// 最大の角加速度の大きさのバッキングフィールド
+		/// </summary>
+		[SerializeField, Range(0f, 20f)]
+		private float maxAngularAcceleration = 6.0f;
+
+		/// <summary>
 		/// 物理ソルバが貫通状態を解決するために導入できる最大の速度のバッキングフィールド
 		/// </summary>
 		[SerializeField, Range(10f, 50f)]
@@ -312,6 +318,21 @@ namespace Speedcar
 		}
 
 		/// <summary>
+		/// 最大の角加速度の大きさ
+		/// </summary>
+		public float MaxAngularAcceleration
+		{
+			get
+			{
+				return maxAngularAcceleration;
+			}
+			set
+			{
+				maxAngularAcceleration = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
 		/// 物理ソルバが貫通状態を解決するために導入できる最大の速度
 		/// </summary>
 		public float MaxDepenetrationSpeed
@@ -407,6 +428,7 @@ namespace Speedcar
 		/// </summary>
 		private void FixedUpdate()
 		{
+			LimitAngularAcceleration();
 			UpdateMeasurements();
 			AddExtraGravity();
 			AddAerodynamicFriction();
@@ -421,6 +443,17 @@ namespace Speedcar
 		{
 			var newAngularVelocity = Vector3.MoveTowards(AngularVelocity, Rigidbody.angularVelocity, MaxAngularVelocityDeltaOnCollision);
 			Rigidbody.AddTorque(newAngularVelocity - AngularVelocity, ForceMode.VelocityChange);
+		}
+
+		/// <summary>
+		/// 角加速度を制限する
+		/// </summary>
+		private void LimitAngularAcceleration()
+		{
+			if (Vector3.Distance(AngularVelocity, Rigidbody.angularVelocity) > MaxAngularAcceleration * Time.fixedDeltaTime)
+			{
+				Rigidbody.angularVelocity = Vector3.MoveTowards(AngularVelocity, Rigidbody.angularVelocity, MaxAngularAcceleration * Time.fixedDeltaTime);
+			}
 		}
 
 		/// <summary>
