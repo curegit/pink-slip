@@ -7,8 +7,8 @@ PhysicMaterial:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Car Body
-  dynamicFriction: 0.71
-  staticFriction: 0.05
-  bounciness: 0.76
+  dynamicFriction: 0.4
+  staticFriction: 0.2
+  bounciness: 0.3
   frictionCombine: 0
   bounceCombine: 0
