@@ -72,7 +72,7 @@ namespace Speedcar
 		/// <summary>
 		/// ステアリング範囲の制限が最大になる速さのバッキングフィールド
 		/// </summary>
-		[SerializeField, Range(0f, 1f)]
+		[SerializeField, Range(0f, 200f)]
 		private float limitedSteerRateSpeed = 90f;
 
 		/// <summary>
