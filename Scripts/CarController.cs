@@ -441,13 +441,13 @@ namespace Speedcar
 				// スリップが目標より多い場合
 				if (accelerationSlip > targetSlip)
 				{
-					// 入力がTCS補正値より小さければそのまま
-					if (Gas < tcsGas)
+					// 入力がTCS補正値以下ならばそのまま
+					if (Gas <= tcsGas)
 					{
 						IsGasAdjusted = false;
 						AdjustedGas = Gas;
 					}
-					// 入力がTCS補正値以上ならばTCSを作動
+					// 入力がTCS補正値より大きいならばTCSを作動
 					else
 					{
 						IsGasAdjusted = true;
@@ -498,13 +498,13 @@ namespace Speedcar
 				// スリップが目標より多い場合
 				if (brakingSlip > targetSlip)
 				{
-					// 入力がABS補正値より小さければそのまま
-					if (Brake < absBrake)
+					// 入力がABS補正値以下ならばそのまま
+					if (Brake <= absBrake)
 					{
 						IsBrakeAdjusted = false;
 						AdjustedBrake = Brake;
 					}
-					// 入力がABS補正値以上ならばABSを作動
+					// 入力がABS補正値より大きいならばABSを作動
 					else
 					{
 						IsBrakeAdjusted = true;
