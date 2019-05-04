@@ -356,6 +356,16 @@ namespace Speedcar
 		public float AdjustedSteerRate { get; private set; }
 
 		/// <summary>
+		/// 今ABSが働いているか
+		/// </summary>
+		public bool IsBrakeAdjusted { get; private set; }
+
+		/// <summary>
+		/// 今TCSが働いているか
+		/// </summary>
+		public bool IsGasAdjusted { get; private set; }
+
+		/// <summary>
 		/// 車体コンポーネント
 		/// </summary>
 		private Body Body { get; set; }
@@ -434,11 +444,13 @@ namespace Speedcar
 					// 入力がTCS補正値より小さければそのまま
 					if (Gas < tcsGas)
 					{
+						IsGasAdjusted = false;
 						AdjustedGas = Gas;
 					}
 					// 入力がTCS補正値以上ならばTCSを作動
 					else
 					{
+						IsGasAdjusted = true;
 						AdjustedGas = tcsGas;
 					}
 				}
@@ -448,11 +460,13 @@ namespace Speedcar
 					// 入力が直前のものより小さければ直ちに従う
 					if (Gas < AdjustedGas)
 					{
+						IsGasAdjusted = false;
 						AdjustedGas = Gas;
 					}
 					// 入力が直前のもの以上ならば踏み込みを制限する
 					else
 					{
+						IsGasAdjusted = Mathf.Abs(AdjustedGas - Gas) > TractionControlMaxGasDelta;
 						AdjustedGas = Mathf.MoveTowards(AdjustedGas, Gas, TractionControlMaxGasDelta);
 					}
 				}
@@ -460,6 +474,7 @@ namespace Speedcar
 			// TCSがない場合は入力をそのまま使用する
 			else
 			{
+				IsGasAdjusted = false;
 				AdjustedGas = Gas;
 			}
 		}
@@ -486,11 +501,13 @@ namespace Speedcar
 					// 入力がABS補正値より小さければそのまま
 					if (Brake < absBrake)
 					{
+						IsBrakeAdjusted = false;
 						AdjustedBrake = Brake;
 					}
 					// 入力がABS補正値以上ならばABSを作動
 					else
 					{
+						IsBrakeAdjusted = true;
 						AdjustedBrake = absBrake;
 					}
 				}
@@ -500,11 +517,13 @@ namespace Speedcar
 					// 入力が直前のものより小さければ直ちに従う
 					if (Brake < AdjustedBrake)
 					{
+						IsBrakeAdjusted = false;
 						AdjustedBrake = Brake;
 					}
 					// 入力が直前のもの以上ならば踏み込みを制限する
 					else
 					{
+						IsBrakeAdjusted = Mathf.Abs(AdjustedBrake - Brake) > AntiLockBrakeMaxStepDelta;
 						AdjustedBrake = Mathf.MoveTowards(AdjustedBrake, Brake, AntiLockBrakeMaxStepDelta);
 					}
 				}
@@ -512,6 +531,7 @@ namespace Speedcar
 			// ABSがない場合は入力をそのまま使用する
 			else
 			{
+				IsBrakeAdjusted = false;
 				AdjustedBrake = Brake;
 			}
 		}
