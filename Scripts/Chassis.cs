@@ -792,6 +792,11 @@ namespace Speedcar
 		}
 
 		/// <summary>
+		/// 今オーバーステアアシストが働いているか
+		/// </summary>
+		public bool IsAntiOversteerWorking { get; private set; }
+
+		/// <summary>
 		/// 前輪のトレッド
 		/// </summary>
 		public float FrontTrack
@@ -1006,14 +1011,19 @@ namespace Speedcar
 			var velocityDirection = (Rigidbody.velocity - Rigidbody.rotation * Vector3.up * Vector3.Dot(Rigidbody.velocity, Rigidbody.rotation * Vector3.up)).normalized;
 			float angle = -Mathf.Asin(Vector3.Dot(Vector3.Cross(driveDirection, velocityDirection), Rigidbody.rotation * Vector3.up));
 			float angularVelocity = Rigidbody.angularVelocity.y;
-			foreach (var wheelCollider in FrontWheelColliders)
+			if (angle * SteerRate < 0)
 			{
-				if (angle * SteerRate < 0)
+				IsAntiOversteerWorking = true;
+				foreach (var wheelCollider in FrontWheelColliders)
 				{
 					var sideway = wheelCollider.sidewaysFriction;
 					sideway.stiffness = sideway.stiffness * (1.0f - Mathf.Clamp01(AntiOversteer * Mathf.Abs(angularVelocity)));
 					wheelCollider.sidewaysFriction = sideway;
 				}
+			}
+			else
+			{
+				IsAntiOversteerWorking = false;
 			}
 		}
 
