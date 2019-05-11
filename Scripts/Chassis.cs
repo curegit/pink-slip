@@ -148,6 +148,18 @@ namespace Speedcar
 		private FrictionCurveSet frictionCurveSet = new FrictionCurveSet();
 
 		/// <summary>
+		/// グリップが最大倍される速さのときのグリップ倍率
+		/// </summary>
+		[SerializeField]
+		private float maxGripMultiplier = 2f;
+
+		/// <summary>
+		/// グリップが最大倍される速さ
+		/// </summary>
+		[SerializeField]
+		private float maxGripMultiplierSpeed = 85f;
+
+		/// <summary>
 		/// サブステップを変更する速度の閾値のバッキングフィールド
 		/// </summary>
 		[SerializeField]
@@ -584,6 +596,36 @@ namespace Speedcar
 		}
 
 		/// <summary>
+		/// グリップが最大倍される速さのときのグリップ倍率
+		/// </summary>
+		public float MaxGripMultiplier
+		{
+			get
+			{
+				return maxGripMultiplier;
+			}
+			set
+			{
+				maxGripMultiplier = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
+		/// グリップが最大倍される速さ
+		/// </summary>
+		public float MaxGripMultiplierSpeed
+		{
+			get
+			{
+				return maxGripMultiplierSpeed;
+			}
+			set
+			{
+				maxGripMultiplierSpeed = Mathf.Max(value, 0f);
+			}
+		}
+
+		/// <summary>
 		/// サブステップを変更する速度の閾値
 		/// </summary>
 		public float SubstepsSpeedThreshold
@@ -978,32 +1020,35 @@ namespace Speedcar
 		/// </summary>
 		private void UpdateFrictionCurve()
 		{
+			// 速さによる追加グリップ倍率を求める
+			float speedFactor = Mathf.InverseLerp(0f, MaxGripMultiplierSpeed, Mathf.Abs(Body.ForwardVelocity));
+			float speedStiffnessMultiplier = Mathf.Lerp(1f, MaxGripMultiplier, speedFactor);
 			// 左前輪
 			var frontLeftForward = FrictionCurveSet.FrontForwardFriction;
 			var frontLeftSideways = FrictionCurveSet.FrontSidewaysFriction;
-			frontLeftForward.stiffness = frontLeftForward.stiffness * FrontLeftWheelStiffnessMultiplier;
-			frontLeftSideways.stiffness = frontLeftSideways.stiffness * FrontLeftWheelStiffnessMultiplier;
+			frontLeftForward.stiffness = frontLeftForward.stiffness * FrontLeftWheelStiffnessMultiplier * speedStiffnessMultiplier;
+			frontLeftSideways.stiffness = frontLeftSideways.stiffness * FrontLeftWheelStiffnessMultiplier * speedStiffnessMultiplier;
 			FrontLeftWheelCollider.forwardFriction = frontLeftForward;
 			FrontLeftWheelCollider.sidewaysFriction = frontLeftSideways;
 			// 右前輪
 			var frontRightForward = FrictionCurveSet.FrontForwardFriction;
 			var frontRightSideways = FrictionCurveSet.FrontSidewaysFriction;
-			frontRightForward.stiffness = frontRightForward.stiffness * FrontRightWheelStiffnessMultiplier;
-			frontRightSideways.stiffness = frontRightSideways.stiffness * FrontRightWheelStiffnessMultiplier;
+			frontRightForward.stiffness = frontRightForward.stiffness * FrontRightWheelStiffnessMultiplier * speedStiffnessMultiplier;
+			frontRightSideways.stiffness = frontRightSideways.stiffness * FrontRightWheelStiffnessMultiplier * speedStiffnessMultiplier;
 			FrontRightWheelCollider.forwardFriction = frontRightForward;
 			FrontRightWheelCollider.sidewaysFriction = frontRightSideways;
 			// 左後輪
 			var rearLeftForward = FrictionCurveSet.RearForwardFriction;
 			var rearLeftSideways = FrictionCurveSet.RearSidewaysFriction;
-			rearLeftForward.stiffness = rearLeftForward.stiffness * RearLeftWheelStiffnessMultiplier;
-			rearLeftSideways.stiffness = rearLeftSideways.stiffness * RearLeftWheelStiffnessMultiplier;
+			rearLeftForward.stiffness = rearLeftForward.stiffness * RearLeftWheelStiffnessMultiplier * speedStiffnessMultiplier;
+			rearLeftSideways.stiffness = rearLeftSideways.stiffness * RearLeftWheelStiffnessMultiplier * speedStiffnessMultiplier;
 			RearLeftWheelCollider.forwardFriction = rearLeftForward;
 			RearLeftWheelCollider.sidewaysFriction = rearLeftSideways;
 			// 右後輪
 			var rearRightForward = FrictionCurveSet.RearForwardFriction;
 			var rearRightSideways = FrictionCurveSet.RearSidewaysFriction;
-			rearRightForward.stiffness = rearRightForward.stiffness * RearRightWheelStiffnessMultiplier;
-			rearRightSideways.stiffness = rearRightSideways.stiffness * RearRightWheelStiffnessMultiplier;
+			rearRightForward.stiffness = rearRightForward.stiffness * RearRightWheelStiffnessMultiplier * speedStiffnessMultiplier;
+			rearRightSideways.stiffness = rearRightSideways.stiffness * RearRightWheelStiffnessMultiplier * speedStiffnessMultiplier;
 			RearRightWheelCollider.forwardFriction = rearRightForward;
 			RearRightWheelCollider.sidewaysFriction = rearRightSideways;
 			// オーバーステアを制御可能にする

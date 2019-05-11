@@ -86,6 +86,8 @@ namespace Speedcar.EditorOnly
 			PropertyField("frictionCurveSet.rearForwardStiffness");
 			PropertyField("frictionCurveSet.frontSidewaysStiffness");
 			PropertyField("frictionCurveSet.rearSidewaysStiffness");
+			PropertyField("maxGripMultiplier");
+			PropertyField("maxGripMultiplierSpeed");
 			DecreaseIndent();
 			// サブステップについて
 			Space();
@@ -133,6 +135,8 @@ namespace Speedcar.EditorOnly
 			Chassis.FrictionCurveSet.FrontSidewaysStiffness = Chassis.FrictionCurveSet.FrontSidewaysStiffness;
 			Chassis.FrictionCurveSet.RearSidewaysStiffness = Chassis.FrictionCurveSet.RearSidewaysStiffness;
 			Chassis.FrictionCurveSet = Chassis.FrictionCurveSet;
+			Chassis.MaxGripMultiplier = Chassis.MaxGripMultiplier;
+			Chassis.MaxGripMultiplierSpeed = Chassis.MaxGripMultiplierSpeed;
 			Chassis.SubstepsSpeedThreshold = Chassis.SubstepsSpeedThreshold;
 			Chassis.SubstepsAboveThreshold = Chassis.SubstepsAboveThreshold;
 			Chassis.SubstepsBelowThreshold = Chassis.SubstepsBelowThreshold;
