@@ -176,9 +176,9 @@ namespace Speedcar.Extra
 			if (Car != carController)
 			{
 				carController = Car;
-				body = Car.GetComponent<Body>();
-				chassis = Car.GetComponent<Chassis>();
-				powertrain = Car.GetComponent<Powertrain>();
+				body = Car?.GetComponent<Body>();
+				chassis = Car?.GetComponent<Chassis>();
+				powertrain = Car?.GetComponent<Powertrain>();
 			}
 		}
 
@@ -187,7 +187,7 @@ namespace Speedcar.Extra
 		/// </summary>
 		private void OnGUI()
 		{
-			if (Car)
+			if (carController)
 			{
 				var style = GUI.skin.box;
 				style.richText = true;
