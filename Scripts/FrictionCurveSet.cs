@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Speedcar
+namespace PinkSlip
 {
 	/// <summary>
 	/// ホイールコライダに渡す摩擦曲線の表現

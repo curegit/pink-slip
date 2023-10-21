@@ -1,4 +1,4 @@
-﻿namespace Speedcar
+﻿namespace PinkSlip
 {
 	/// <summary>
 	/// 過給器の種類

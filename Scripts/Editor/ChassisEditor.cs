@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 
-namespace Speedcar.EditorOnly
+namespace PinkSlip.EditorOnly
 {
 	/// <summary>
 	/// 車両の足回りのエディタ拡張

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Speedcar
+namespace PinkSlip
 {
 	/// <summary>
 	/// 車体の特性と物理挙動の制御

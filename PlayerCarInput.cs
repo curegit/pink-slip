@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Speedcar;
+using PinkSlip;
 
 // プレイヤーからの入力をカーコントローラに適用するクラス
 public class PlayerCarInput : MonoBehaviour

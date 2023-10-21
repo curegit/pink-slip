@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using UnityEngine;
 
-namespace Speedcar.Extra
+namespace PinkSlip.Extra
 {
 	/// <summary>
 	/// 車の基本情報を簡易表示する

@@ -1,4 +1,4 @@
-﻿namespace Speedcar
+﻿namespace PinkSlip
 {
 	/// <summary>
 	/// 車体の重心の設定方法

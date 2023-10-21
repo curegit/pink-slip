@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using UnityEngine;
 
-namespace Speedcar
+namespace PinkSlip
 {
 	/// <summary>
 	/// 車両の入力インターフェイス

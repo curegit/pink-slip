@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 
-namespace Speedcar.EditorOnly
+namespace PinkSlip.EditorOnly
 {
 	/// <summary>
 	/// 動力系コンポーネントのエディタ拡張

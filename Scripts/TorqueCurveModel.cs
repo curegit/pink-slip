@@ -1,4 +1,4 @@
-﻿namespace Speedcar
+﻿namespace PinkSlip
 {
 	/// <summary>
 	/// トルク曲線の表現方法

@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Speedcar
+namespace PinkSlip
 {
 	/// <summary>
 	/// トルク曲線のパラメータによる表現
